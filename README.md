@@ -35,7 +35,7 @@ and start the program by typing
 Alternatively, you can create a shortcut on the Desktop. Simply create one that points first to the python executable of your AutoScript4 
 installation and then the path to the repository, pointing at the SerialFIB.py file. On our systems, this would e.g. look like this: 
 
-"C:\Program Files\Python35\envs\AutoScript\python.exe" D:\SharedData\SFIB_UserCopy\SerialFIB.py
+"C:\Program Files\Python35\envs\AutoScript\python.exe" D:\SharedData\SerialFIB\SerialFIB.py
 
 The SerialFIB GUI can also be run locally, either with a virtual AutoScript4 machine to enable response from the virtual microscope, 
 or simply by starting SerialFIB (python SerialFIB.py). This will load dummy images found in the ./DummyImages/ directory of the repository.
