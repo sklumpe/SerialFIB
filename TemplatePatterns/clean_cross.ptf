@@ -1,0 +1,62 @@
+<Content Version="FEI PatternFile 1.2">
+  <PatternList>
+    <Mode xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Serial</Mode>
+    <Beam xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Ion</Beam>
+    <GasType xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
+    </GasType>
+    <GasSetpoint xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
+    </GasSetpoint>
+    <GasNeedlePosition xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
+    </GasNeedlePosition>
+    <Defocus xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</Defocus>
+    <PassCount xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</PassCount>
+    <Blur xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</Blur>
+  </PatternList>
+  <PatternCleaningCrossSection>
+    <Application xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Si-ccs</Application>
+    <Beam xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Ion</Beam>
+    <DwellTime xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0.000001</DwellTime>
+    <CenterX xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">-3.40352564102553E-05</CenterX>
+    <CenterY xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">-3.25825320512833E-05</CenterY>
+    <Rotation xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</Rotation>
+    <GasType xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
+    </GasType>
+    <GasSetpoint xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
+    </GasSetpoint>
+    <GasNeedlePosition xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
+    </GasNeedlePosition>
+    <Defocus xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</Defocus>
+    <RefreshTime xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</RefreshTime>
+    <TotalTime xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">36996.35394</TotalTime>
+    <PassCount xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">364</PassCount>
+    <Enable xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">True</Enable>
+    <ExclusionZone xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">False</ExclusionZone>
+    <Depth xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">9.99333182073761E-07</Depth>
+    <Blur xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</Blur>
+    <InteractionDiameter xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</InteractionDiameter>
+    <RelativeInteractionDiameter xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</RelativeInteractionDiameter>
+    <TotalDiameter xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0.000000019</TotalDiameter>
+    <VolumePerDose xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0.000000002</VolumePerDose>
+    <Dose xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">7.85368819945012E-10</Dose>
+    <SaturationSputterRate xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</SaturationSputterRate>
+    <TotalVolumeSputterRate xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">1.16834400000062E-19</TotalVolumeSputterRate>
+    <SaturationCurrentDensity xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">1</SaturationCurrentDensity>
+    <MaximumDosePerArea xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</MaximumDosePerArea>
+    <VolumeEtchRate xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">1.16834400000062E-19</VolumeEtchRate>
+    <VolumeGasAssistedRate xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</VolumeGasAssistedRate>
+    <VolumeDoseLimitedRate xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0</VolumeDoseLimitedRate>
+    <TotalLinearSputterRate xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">4.12072515970871E-04</TotalLinearSputterRate>
+    <TotalBeamArea xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">2.83528736986479E-16</TotalBeamArea>
+    <DepthPerPass xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">2.74542082987297E-09</DepthPerPass>
+    <AreaCalculation xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Pattern</AreaCalculation>
+    <Width xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">1.35310897435899E-04</Width>
+    <Length xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">3.19599358974362E-05</Length>
+    <ScanDirection xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">BottomToTop</ScanDirection>
+    <ScanType xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Serpentine</ScanType>
+    <PitchX xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0.00000000285</PitchX>
+    <PitchY xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">0.0000000095</PitchY>
+    <EqualPitch xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">False</EqualPitch>
+    <OverlapX xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">85</OverlapX>
+    <OverlapY xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="r8">50</OverlapY>
+  </PatternCleaningCrossSection>
+</Content>

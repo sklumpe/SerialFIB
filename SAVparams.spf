@@ -1,0 +1,13 @@
+IB_Current=3.0e-09
+MillingTime=30
+SliceThickness=0.1e-06
+PatternType=Cross-Section
+ScanDirection=TopToBottom
+AlignInitial=0
+RealignEvery=4
+FocusInitial=1
+FocusEvery=4
+DwellTime=2.0e-06
+Resolution=1536x1024
+LineIntegration=1
+RealignSEMEvery=4

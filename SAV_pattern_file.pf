@@ -1,0 +1,336 @@
+Step_Name=Step 0
+Step=0
+IB_Current=5e-07
+Pattern=0
+Offset_y=-1.0683650852581793e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 1
+Step=1
+IB_Current=5e-07
+Pattern=0
+Offset_y=-9.683650852581792e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 2
+Step=2
+IB_Current=5e-07
+Pattern=0
+Offset_y=-8.683650852581791e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 3
+Step=3
+IB_Current=5e-07
+Pattern=0
+Offset_y=-7.68365085258179e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 4
+Step=4
+IB_Current=5e-07
+Pattern=0
+Offset_y=-6.683650852581789e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 5
+Step=5
+IB_Current=5e-07
+Pattern=0
+Offset_y=-5.683650852581788e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 6
+Step=6
+IB_Current=5e-07
+Pattern=0
+Offset_y=-4.6836508525817873e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 7
+Step=7
+IB_Current=5e-07
+Pattern=0
+Offset_y=-3.6836508525817863e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 8
+Step=8
+IB_Current=5e-07
+Pattern=0
+Offset_y=-2.683650852581785e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 9
+Step=9
+IB_Current=5e-07
+Pattern=0
+Offset_y=-1.6836508525817842e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 10
+Step=10
+IB_Current=5e-07
+Pattern=0
+Offset_y=-6.836508525817832e-08
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 11
+Step=11
+IB_Current=5e-07
+Pattern=0
+Offset_y=3.163491474182178e-08
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 12
+Step=12
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.3163491474182188e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 13
+Step=13
+IB_Current=5e-07
+Pattern=0
+Offset_y=2.3163491474182198e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 14
+Step=14
+IB_Current=5e-07
+Pattern=0
+Offset_y=3.316349147418221e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 15
+Step=15
+IB_Current=5e-07
+Pattern=0
+Offset_y=4.316349147418222e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 16
+Step=16
+IB_Current=5e-07
+Pattern=0
+Offset_y=5.316349147418223e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 17
+Step=17
+IB_Current=5e-07
+Pattern=0
+Offset_y=6.316349147418224e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 18
+Step=18
+IB_Current=5e-07
+Pattern=0
+Offset_y=7.316349147418225e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 19
+Step=19
+IB_Current=5e-07
+Pattern=0
+Offset_y=8.316349147418226e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 20
+Step=20
+IB_Current=5e-07
+Pattern=0
+Offset_y=9.316349147418227e-07
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 21
+Step=21
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.0316349147418226e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 22
+Step=22
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.1316349147418229e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 23
+Step=23
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.2316349147418232e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 24
+Step=24
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.331634914741823e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 25
+Step=25
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.431634914741823e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 26
+Step=26
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.5316349147418233e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step
+Step_Name=Step 27
+Step=27
+IB_Current=5e-07
+Pattern=0
+Offset_y=1.6316349147418236e-06
+Offset_x=0.0e-06
+Height_y=1e-07
+Width_x=6.6555336380699136e-06
+PatternType=Cleaning Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+/Step

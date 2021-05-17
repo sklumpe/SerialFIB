@@ -1,0 +1,6 @@
+output_dir=./
+custompatternfile=./patternfile.pf
+custommillprotocol=./testprotocol.pro
+roughmillprotocol=./roughmill.pro
+finemillprotocol=./finemill.pro
+SAVparamsfile=./SAVparams.spf
