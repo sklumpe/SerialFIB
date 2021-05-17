@@ -4,6 +4,8 @@
 
 A Modular Platform for Streamlining Automated Cryo-FIB Workflows 
 
+![Architecture Overview](DummyImages/SerialFIB.png)
+
 SerialFIB was developed at the Max Planck Institute of Biochemistry, Research Group CryoEM Technology and the Mahamid group, European Molecular Biology Laboratory (EMBL). 
 
 It is written in Python3, comes with a PyQt5 GUI, and uses code from 3DCT [http://3dct.semper.space](http://3dct.semper.space)
