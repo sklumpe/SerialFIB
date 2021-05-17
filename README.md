@@ -55,7 +55,7 @@ into the command-line of your OS.
 
 ### Usage ###
 
-A tutorial on how to use SerialFIB can be found in the repository. [http://github.com/sklumpe/SerialFIB/20210428_SerialFIB_Tutorial.pdf](http://github.com/sklumpe/SerialFIB/20210428_SerialFIB_Tutorial.pdf).
+A tutorial on how to use SerialFIB can be found in the repository. [https://github.com/sklumpe/SerialFIB/blob/main/20210428_SerialFIB_Tutorial.pdf](https://github.com/sklumpe/SerialFIB/blob/main/20210428_SerialFIB_Tutorial.pdf).
 
 Scripting examples are given in the ./ScriptingExamples/ directory and include unit test we used during development. 
 
