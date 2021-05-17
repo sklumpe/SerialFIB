@@ -72,7 +72,7 @@ All adjustable parameters can be viewed by the -h flag.
 
 ### License ###
 
-Copyright (C) 2021 Sven Klumpe 
+Copyright (C) 2021 Sven Klumpe EMBL/Herman Fung EMBL/Sara Goetz Jürgen Plitzko EMBL/Julia Mahamid
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
