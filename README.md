@@ -95,11 +95,8 @@ Version 1.0 is the first public release.
 
 We ask users to cite:
 
-* The general [paper](http://dx.doi.org/10.1016/j.bpj.2015.10.053) that forms the basis of the 3D Correlation Toolbox
-+ When using independent modules/scripts from the source code, any [specific](http://3dct.semper.space/documentation.html#citable) publications of modules/scripts used in this software
+* The general paper (will be updated once DOI is available).
+* The [paper](http://dx.doi.org/10.1016/j.bpj.2015.10.053) that forms the basis of the 3D Correlation Toolbox
 
-If journal reference limits interfere, the module/script-specific publications should take precedence.
-
-In general, please cite this project and the modules/scripts used in it.
 
 Thank you for your support!
