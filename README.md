@@ -13,7 +13,7 @@ So far, it has only been developed with Thermo Fisher Scientific AutoScript4. Wh
 the Aquilos and Scios system. AutoScript4 is commercially available from Thermo Fisher Scientific. 
 
 
-With questions, bug reports, and feature requests, please contact: 
+While we did our best to provide a bug-free version, there will most likely be things we didn't test in advance. With questions, bug reports, and feature requests, please contact: 
 klumpe (at) biochem.mpg.de
 
 ### Installation ###
