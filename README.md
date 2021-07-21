@@ -97,7 +97,7 @@ Version 1.0 is the first public release.
 
 We ask users to cite:
 
-* The general [paper] (https://www.biorxiv.org/content/10.1101/2021.05.19.444745v1) on the automation software currently on bioRxiv.
+* The general [paper](http://www.biorxiv.org/content/10.1101/2021.05.19.444745v1) on the automation software currently on bioRxiv.
 * The [paper](http://dx.doi.org/10.1016/j.bpj.2015.10.053) that forms the basis of the 3D Correlation Toolbox
 
 
