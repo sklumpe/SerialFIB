@@ -51,7 +51,7 @@ For local installation without AutoScript4, the dependencies are:
 
 They can be installed by typing
 
-    pip install PyQt5 numpy cv2 pickle skimage 
+    pip install PyQt5 numpy opencv-python PyWavelets scikit-image 
 
 into the command-line of your OS.
 
@@ -97,7 +97,7 @@ Version 1.0 is the first public release.
 
 We ask users to cite:
 
-* The general paper (will be updated once DOI is available).
+* The general [paper] (https://www.biorxiv.org/content/10.1101/2021.05.19.444745v1) on the automation software currently on bioRxiv.
 * The [paper](http://dx.doi.org/10.1016/j.bpj.2015.10.053) that forms the basis of the 3D Correlation Toolbox
 
 
