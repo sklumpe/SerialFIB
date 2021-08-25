@@ -1,0 +1,78 @@
+### Testing cryo-FIB custom milling ### 
+
+### User Input ###
+output_dir=r'D:/SharedData/Sven/20210805_WaffleDev/Test4/'
+
+patternfile_trench=r'D:/SharedData/Sven/20210805_WaffleDev/patternfiles/TopCut2.pf'
+
+patternfile_notch=r'D:/SharedData/Sven/20210805_WaffleDev/patternfiles/notch.pf'
+
+lamella_protocol=r'D:/SharedData/Sven/20210805_WaffleDev/patternfiles/lamellamill.pro'
+
+img_index_trench=2
+stagepos_index_trench=0
+pattern_index_trench=2
+
+img_index_notch=0
+stagepos_index_notch=1
+pattern_index_notch=0
+
+img_index_lamella=1
+stagepos_index_lamella=1
+pattern_index_lamella=1
+
+#############
+
+
+#### Initial Trench from Above ####
+
+### Definition of variables ###
+
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index_trench]['label']
+alignment_image=images[img_index_trench]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_trench]
+
+fibsem.write_patterns(label,patterns[pattern_index_trench],alignment_image,output_dir)
+
+
+fibsem.run_milling_custom(label,alignment_image,stagepos,pattern_dir,patternfile_trench)
+
+
+#### Nodge Milling ####
+
+label=stagepositions[stagepos_index_nodge]['label']
+alignment_image=images[img_index_nodge]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_notch]
+
+fibsem.write_patterns(label,patterns[pattern_index_notch],alignment_image,output_dir)
+
+fibsem.run_milling_custom(label,alignment_image,stagepos,pattern_dir,patternfile_notch)
+
+
+
+#### Lamella Milling ####
+
+
+
+#############
+
+### Definition of variables ###
+
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index_lamella]['label']
+alignment_image=images[img_index_lamella]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_lamella]
+
+#print(patterns)
+fibsem.write_patterns(label,patterns[pattern_index_lamella],alignment_image,output_dir)
+
+
+### Creating patternfile ###
+
+
+
+fibsem.run_milling_protocol(label,alignment_image,stagepos,pattern_dir,lamella_protocol)
