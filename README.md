@@ -37,6 +37,10 @@ installation and then the path to the repository, pointing at the SerialFIB.py f
 
 "C:\Program Files\Python35\envs\AutoScript\python.exe" D:\SharedData\SerialFIB\SerialFIB.py
 
+Furthermore, in the same shortcut, please make sure to start the program in the directory of the GitHub repository, in this case:  
+
+D:\SharedData\SerialFIB
+
 The SerialFIB GUI can also be run locally, either with a virtual AutoScript4 machine to enable response from the virtual microscope, 
 or simply by starting SerialFIB (python SerialFIB.py). This will load dummy images found in the ./DummyImages/ directory of the repository.
 
