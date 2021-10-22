@@ -9,7 +9,7 @@ A Modular Platform for Streamlining Automated Cryo-FIB Workflows
 SerialFIB is developed at the Max Planck Institute of Biochemistry, Research Group CryoEM Technology and the Mahamid group, European Molecular Biology Laboratory (EMBL). 
 
 It is written in Python3, comes with a PyQt5 GUI, and uses code from 3DCT [http://3dct.semper.space](http://3dct.semper.space)
-So far, it has only been developed with Thermo Fisher Scientific AutoScript4. While we did our best to seperate SerialFIB's image handling from AutoScript4, other drivers have not been written yet, so its usage is limited to Thermo Fisher Scientific Instruments. It has been tested on 
+So far, it has only been developed with Thermo Fisher Scientific AutoScript4. While we did our best to separate SerialFIB's image handling from AutoScript4, other drivers have not been written yet, so its usage is limited to Thermo Fisher Scientific Instruments. It has been tested on 
 the Aquilos and Scios system. AutoScript4 is commercially available from Thermo Fisher Scientific. 
 
 
@@ -17,7 +17,7 @@ While we did our best to provide a bug-free version, there will surely be things
 klumpe (at) biochem.mpg.de
 
 ### Installation ###
-Once AutoScript4 (version 4.0 and higher) has been installed on your system , the only package that is missing should be PyQt5.
+Once AutoScript4 (version 4.0 and higher) has been installed on your system, the only package that is missing should be PyQt5.
 It can be install simply via pip by typing
 
     pip install PyQt5
@@ -37,12 +37,12 @@ installation and then the path to the repository, pointing at the SerialFIB.py f
 
 	"C:\Program Files\Python35\envs\AutoScript\python.exe" D:\SharedData\SerialFIB\SerialFIB.py
 
-Furthermore, in the same shortcut, please make sure to start the program in the directory of the GitHub repository, in this case:  
+Furthermore, in the same shortcut, please make sure to start the program in the directory of the GitHub repository, in this case:
 
 	D:\SharedData\SerialFIB
 
 The SerialFIB GUI can also be run locally, either with a virtual AutoScript4 machine to enable response from the virtual microscope, 
-or simply by starting SerialFIB (python SerialFIB.py). This will load dummy images found in the ./DummyImages/ directory of the repository.
+or simply by starting SerialFIB (`python SerialFIB.py`). This will load dummy images found in the ./DummyImages/ directory of the repository.
 
 For local installation without AutoScript4, the dependencies are: 
 
@@ -65,12 +65,12 @@ A tutorial on how to use SerialFIB can be found in the repository. [https://gith
 
 Tutorial videos with explanations on how SerialFIB works and its usage are uploaded to [YouTube](https://www.youtube.com/watch?v=QR7ngJ0apBk&t=0s).
 
-Scripting examples are given in the ./ScriptingExamples/ directory and include unit test we used during development. 
+Scripting examples are given in the ./ScriptingExamples/ directory and include unit tests we used during development. 
 
 
 
 
-The analysis script for SEM images produced by SerialFIB's volume imaging module can be found in the directory ./analysis/ . Generaly usage is
+The analysis script for SEM images produced by SerialFIB's volume imaging module can be found in the directory ./analysis/ . Generally usage is
 
     python processSEM.py -indir INPUT_DIRECTORY -outdir OUTPUT_DIRECTORY
 
