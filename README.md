@@ -35,7 +35,11 @@ and start the program by typing
 Alternatively, you can create a shortcut on the Desktop. Simply create one that points first to the python executable of your AutoScript4 
 installation and then the path to the repository, pointing at the SerialFIB.py file. On our systems, this would e.g. look like this: 
 
-"C:\Program Files\Python35\envs\AutoScript\python.exe" D:\SharedData\SerialFIB\SerialFIB.py
+	"C:\Program Files\Python35\envs\AutoScript\python.exe" D:\SharedData\SerialFIB\SerialFIB.py
+
+Furthermore, in the same shortcut, please make sure to start the program in the directory of the GitHub repository, in this case:  
+
+	D:\SharedData\SerialFIB
 
 The SerialFIB GUI can also be run locally, either with a virtual AutoScript4 machine to enable response from the virtual microscope, 
 or simply by starting SerialFIB (python SerialFIB.py). This will load dummy images found in the ./DummyImages/ directory of the repository.
@@ -59,7 +63,11 @@ into the command-line of your OS.
 
 A tutorial on how to use SerialFIB can be found in the repository. [https://github.com/sklumpe/SerialFIB/blob/main/20210428_SerialFIB_Tutorial.pdf](https://github.com/sklumpe/SerialFIB/blob/main/20210428_SerialFIB_Tutorial.pdf).
 
+Tutorial videos with explanations on how SerialFIB works and its usage are uploaded to [YouTube](https://www.youtube.com/watch?v=QR7ngJ0apBk&t=0s).
+
 Scripting examples are given in the ./ScriptingExamples/ directory and include unit test we used during development. 
+
+
 
 
 The analysis script for SEM images produced by SerialFIB's volume imaging module can be found in the directory ./analysis/ . Generaly usage is
