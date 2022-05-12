@@ -41,8 +41,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 #############################################
 
 #### IMPORT AUTOSCRIPT STRUCTURES
-from autoscript_sdb_microscope_client.structures import *
-
+try:
+    from autoscript_sdb_microscope_client.structures import *
+except:
+    print("No Autoscript installed")
 
 ### IMPROT DRIVERS AND TOOLS
 from src.AquilosDriver import fibsem

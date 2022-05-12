@@ -1,0 +1,11 @@
+# SerialFIB log
+SFIB.log
+
+#Cache
+src/__pycache__
+src/CrossbeamDriver.py
+tmp.py
+pickle.tmp
+#Documentation in construction
+documentation/
+

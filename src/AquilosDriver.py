@@ -29,17 +29,21 @@
 
 
 #### IMPORT MICROSCOPE
-from autoscript_sdb_microscope_client import SdbMicroscopeClient
-from autoscript_sdb_microscope_client.enumerations import *
-from autoscript_sdb_microscope_client.structures import *
-# Set Up Microscope
-microscope = SdbMicroscopeClient()
+try:
+    from autoscript_sdb_microscope_client import SdbMicroscopeClient
+    from autoscript_sdb_microscope_client.enumerations import *
+    from autoscript_sdb_microscope_client.structures import *
+    # Set Up Microscope
+    microscope = SdbMicroscopeClient()
 
 
-from autoscript_toolkit.template_matchers import *
-import autoscript_toolkit.vision as vision_toolkit
+    from autoscript_toolkit.template_matchers import * 
+    import autoscript_toolkit.vision as vision_toolkit
+    from src.custom_matchers_v2 import *
+except:
+    print("No Autoscript installed")
 
-from src.custom_matchers_v2 import *
+
 from src.read_SAV import read_SAV_params
 import cv2
 import numpy as np
