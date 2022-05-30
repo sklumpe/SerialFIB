@@ -138,10 +138,7 @@ class fibsem:
         Output: Returns True if microscope is idle, returns false if microscope is milling
         Action: None
         '''
-        if microscope.patterning.state==PatterningState.IDLE:
-            return(True)
-        else:
-            return(False)
+        return microscope.patterning.state == PatterningState.IDLE:
 
     def get_current(self):
         '''
@@ -150,9 +147,10 @@ class fibsem:
         Action: None
         '''
         try:
-            return(float(microscope.beams.ion_beam.beam_current.value))
+            return float(microscope.beams.ion_beam.beam_current.value)
         except:
             print("No microscope connected.")
+
     def take_image_IB(self):
         '''
         Input: None
@@ -259,57 +257,46 @@ class fibsem:
         Action: None
         '''
 
-        #### Microscope dependent code ####
+        #### Microscope-dependent code ####
         try:
-            stageposition=microscope.specimen.stage.current_position
+            stageposition = microscope.specimen.stage.current_position
         except:
-            stageposition=StagePosition(x=0,y=0,z=0,r=0,t=0)
-        x=stageposition.x
-        y=stageposition.y
-        z=stageposition.z
-        r=stageposition.r
-        t=stageposition.t
-        
+            stageposition = StagePosition(x=0, y=0, z=0, r=0, t=0)
 
-        #### Microscope independent code####
-        stage_dict={'x':float(x),'y':float(y),'z':float(z),'r':float(r),'t':float(t)}
-        return(stage_dict)
-    def moveStageAbsolute(self, stageposition):
+        #### Microscope-independent code ####
+        return {
+            'x': float(stageposition.x),
+            'y': float(stageposition.y),
+            'z': float(stageposition.z),
+            'r': float(stageposition.r),
+            't': float(stageposition.t),
+        }
+
+    def moveStageAbsolute(self, stageposition: dict):
         '''
-        Input: Stage position as dictionnary
+        Input: Stage position as dictionary
         Output: None
         Action: Move stage to provided stage position
         '''
-        ### Microscope Independet Code ###
-        x=float(stageposition['x'])
-        y=float(stageposition['y'])
-        z=float(stageposition['z'])
-        r=float(stageposition['r'])
-        t=float(stageposition['t'])
-        #print(x,y,z,r,t)
-        
+        ### Microscope-independent code ###
+        stageposition = {k: float(v) for k, v in stageposition.items()}
 
-        ### Microscope Dependent Code ###
-        stagepos=StagePosition(x=x,y=y,z=z,t=t,r=r)
-        microscope.specimen.stage.absolute_move(stagepos)
-        return()
-    def moveStageRelative(self,stageposition):
+        ### Microscope-dependent code ###
+        microscope.specimen.stage.absolute_move(StagePosition(**stageposition))
+
+    def moveStageRelative(self, stageposition: dict):
         '''
         Input: Change in stage position as directory
         Output: None
         Action: Move stage relative to previous position by given parameters
         '''
-        ### Microscope Independet Code ###
-        x=float(stageposition['x'])
-        y=float(stageposition['y'])
-        z=float(stageposition['z'])
-        r=float(stageposition['r'])
-        t=float(stageposition['t'])
+        ### Microscope-independent code ###
+        stageposition = {k: float(v) for k, v in stageposition.items()}
 
-        ### Microscope Dependent Code ###
-        stagepos=StagePosition(x=x,y=y,z=z,t=t,r=r)
-        microscope.specimen.stage.relative_move(stagepos)
-        return("Stage Moved")
+        ### Microscope-dependent code ###
+        microscope.specimen.stage.relative_move(StagePosition(**stageposition))
+        return "Stage Moved"
+
     def align(self,image,beam,current=1.0e-11):
         '''
         Input: Alignment image, Beam ("ION" or "ELECTRON"), optionally current but replaced by the GUI option
@@ -418,13 +405,14 @@ class fibsem:
                 old_resolution = microscope.beams.electron_beam.scanning.resolution.value
                 old_mag = microscope.beams.electron_beam.horizontal_field_width.value
 
-                img_resolution = str(np.shape(image.data)[1]) + 'x' + str(np.shape(image.data)[0])
+                w, h = np.shape(image.data)
+
+                img_resolution = str(h) + 'x' + str(w)
                 microscope.beams.electron_beam.scanning.resolution.value = img_resolution
                 microscope.beams.electron_beam.horizontal_field_width.value = image.metadata.optics.scan_field_of_view.width
                 microscope.beams.electron_beam.beam_shift.value = Point(0, 0)
 
                 current_img = self.take_image_EB()
-
 
                 favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
                 l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
@@ -432,9 +420,9 @@ class fibsem:
                 move_count = 0
 
                 while l.confidence < 0.98 and move_count < 1:
-                    x = l.center_in_meters.x * -1  # sign may need to be flipped depending on matcher
-                    y = l.center_in_meters.y * -1
-                    distance = np.sqrt(x ** 2 + y ** 2)
+                    x = -l.center_in_meters.x  # sign may need to be flipped depending on matcher
+                    y = -l.center_in_meters.y
+                    distance = np.hypot(x, y)
                     print("Deviation (in meters): " + str(distance))
 
 
@@ -1285,7 +1273,7 @@ class fibsem:
     def custom_file_parser(self, custom_filename):
         '''
         Input: path to pattern sequence file
-        Output: Dictionnary of AutoScript4 patterns corresponding to step names, list of step names,
+        Output: dictionary of AutoScript4 patterns corresponding to step names, list of step names,
                 list of ion beam currents corresponding to the step names
         Action: None
         '''
