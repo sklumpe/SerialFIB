@@ -211,9 +211,9 @@ with open('pickle.tmp','rb') as pickle_in:
     images=infile[1]
     patterns=infile[2]
 
-from src.AquilosDriver import fibsem
+from src.AquilosDriver import FIBSEM
 
-fibsem=fibsem()
+fibsem=FIBSEM()
 '''
             )
             outfile.write(commands)
