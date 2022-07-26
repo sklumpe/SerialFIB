@@ -47,7 +47,7 @@ except:
     print("No Autoscript installed")
 
 ### IMPROT DRIVERS AND TOOLS
-from src.AquilosDriver import fibsem
+from src.AquilosDriver import FIBSEM
 from src.scripteditor import Ui_ScriptEditor
 from src.PatternDesigner import Ui_PatternFileEditor
 from src.LamellaDesigner import Ui_LamellaDesigner
@@ -55,7 +55,7 @@ from src.VolumeDesigner import Ui_VolumeDesigner
 from src.Param3D import Param3D
 
 ### INITIALIZE MICROSCOPE FROM DRIVER
-scope=fibsem()
+scope = FIBSEM()
 ###
 
 
@@ -163,6 +163,7 @@ class Ui_MainWindow(object):
         '''
         scene=self.scene
         return(scene)
+
     def get_scenebuffer(self):
         '''
         A function that gets the sceneBuffer
@@ -172,6 +173,7 @@ class Ui_MainWindow(object):
         '''
         scenebuffer=self.sceneBuffer
         return(scenebuffer)
+
     def push_scene_to_buffer(self,scene,ImageBufferHandle):
         '''
         Function to overwrite the current scene given by the
@@ -183,7 +185,7 @@ class Ui_MainWindow(object):
         scenebuffer=self.sceneBuffer
         scenebuffer[ImageBufferHandle]=scene
         self.sceneBuffer=scenebuffer
-        return()
+
     def get_pattern_dict(self):
         '''
         Function to get the pattern dictionnary for e.g. session file writing
@@ -201,7 +203,7 @@ class Ui_MainWindow(object):
         Output: None
         '''
         self.pattern_dict=pattern_dict_new
-        return()
+
     def get_number_imageBuffer(self):
         '''
         Get imageBufferHandle
@@ -786,7 +788,7 @@ class Ui_MainWindow(object):
         # Check if image was taken, else add testimage
         if self.testCase==True:
             self.ktest=self.ktest+1
-            if img==():
+            if img is None:
                 if self.ktest%2==0:
                     array=testimage.data
                     self.ImageBufferImages.append(testimage)
@@ -798,9 +800,9 @@ class Ui_MainWindow(object):
                 array=img.data
                 self.ImageBufferImages.append(img)
         else:
-            if img==():
+            if img is None:
                 print("No Microscope connected!")
-                return()
+                return
             else:
                 array=img.data
                 self.ImageBufferImages.append(img)
@@ -835,7 +837,7 @@ class Ui_MainWindow(object):
         
         # Adjust ImageBufferHandle to new Image
         self.ImageBufferHandle=self.ImageBuffer.count()+1
-        return()
+        return
     
 ##################################
 # /CODE:Button_take_image_IB     #
@@ -858,9 +860,9 @@ class Ui_MainWindow(object):
 
         # Check if image was taken, else add testimage
         
-        if image==():
+        if image is None:
             print("No Microscope connected!")
-            return()
+            return
         else:
             array=image.data
             self.ImageBufferImages.append(image)
@@ -891,11 +893,6 @@ class Ui_MainWindow(object):
         self.checkBox_fluo.setChecked(False)
 
 
-        return()
-
-
-
-
 ##################################
 # CODE:Button_take_image_EB      #
 ##################################
@@ -923,7 +920,7 @@ class Ui_MainWindow(object):
         # Check if image was taken, else add testimage
         if self.testCase==True:
             self.ktest=self.ktest+1
-            if img==():
+            if img is None:
                 if self.ktest%2==0:
                     array=testimage.data
                     self.ImageBufferImages.append(testimage)
@@ -934,9 +931,9 @@ class Ui_MainWindow(object):
                 array=img.data
                 self.ImageBufferImages.append(img)
         else:
-            if img==():
+            if img is None:
                 print("No Microscope connected!")
-                return()
+                return
             else:
                 array=img.data
                 self.ImageBufferImages.append(img)
@@ -960,7 +957,7 @@ class Ui_MainWindow(object):
         self.scene=scene
         self.sceneBuffer.append(self.scene)
         self.checkBox_fluo.setChecked(False)
-        return()
+
 
 ##################################
 # /CODE:Button_take_image_EB     #
@@ -978,7 +975,6 @@ class Ui_MainWindow(object):
         print("Result: "+result)
 
         self.progressDialog.close()
-        return()
 
     
 
@@ -1136,7 +1132,6 @@ class Ui_MainWindow(object):
             print("Something went wrong, please let us know!")
             print(sys.exc_info())
 
-        return()
     def addRow(self):
         try:
             numRows = self.tableWidget.rowCount()
@@ -1282,7 +1277,7 @@ class Ui_MainWindow(object):
             alignment_image=self.ImageBufferImages[int(number)]
         except:
             print("No Images taken!")
-            return()
+            return
         # Find Current selected and add to the Table
         row_list=[index.row() for index in self.tableWidget.selectedIndexes()]
         if len(row_list)==0:
@@ -1296,7 +1291,7 @@ class Ui_MainWindow(object):
             self.tableWidget.setItem(0, 6, QtWidgets.QTableWidgetItem(number))
 
         ### One needs to check whether the pic is IB or EB here! Only IB for alignment
-        return()
+
 
 ####################################
 #/CODE:Button_SaveImageForAlignment#
@@ -1331,7 +1326,6 @@ class Ui_MainWindow(object):
                 h=boundingRect.height()-2
                 rect_list.append(Rectangle(x,y,h,w))
         self.pattern_dict.update({number : rect_list})
-        return()
 
     def button_savePatterns(self):
         print("Saving Patterns ...")
@@ -1366,7 +1360,6 @@ class Ui_MainWindow(object):
                 h=boundingRect.height()-2
                 rect_list.append(Rectangle(x,y,h,w))
         self.pattern_dict.update({number : rect_list})
-        return()
     
     def write_patterns(self):
         directory=self.output_dir+'/'
@@ -1437,7 +1430,6 @@ class Ui_MainWindow(object):
         except:
             print("Something went wrong in the alignment. Please let us know!")
             print(sys.exc_info())
-        return()
 
     def set_alignment_current(self):
 
@@ -1453,8 +1445,7 @@ class Ui_MainWindow(object):
                 pass
         else:
             #scope.alignment_current=float(10*1.0e-12)
-            return()
-        return()
+            pass
 
 ####################################
 #/CODE: Alignment functions        #
@@ -1533,7 +1524,6 @@ class Ui_MainWindow(object):
             print(sys.exc_info())
             import traceback
             traceback.print_tb(inst.__traceback__)
-        return
     
     def compute_fluo_proj(self):
         try:
@@ -1556,7 +1546,6 @@ class Ui_MainWindow(object):
         except:
             print("No file selected or file seems to be corrupt.")
         #   print(sys.exc_info())
-        return
 
     def load_fluo_proj(self):
         from skimage import io
@@ -1573,7 +1562,6 @@ class Ui_MainWindow(object):
         except:
             print("Incorrect file selected")
             print(sys.exc_info())
-        return
 
     # need to uncheck box when showingraphview, load, etc.
     def overlay_fluo(self):
@@ -1595,8 +1583,6 @@ class Ui_MainWindow(object):
                     self.graphicsView.fitInView(self.graphicsView.sceneRect(),self.graphicsView.aspectRatioMode)
                 self.pointer_projpixmap = scene.addPixmap(pixmapImg)
         self.scene = scene
-        return
-
 
     def draw_corr_pattern(self):
         print("drawing_corrpattern")
@@ -1635,7 +1621,6 @@ class Ui_MainWindow(object):
             except:
                 print("No Corrspots detected.")
                 print(sys.exc_info())
-        return
 
 ####################################
 #/CODE:Correlative mill functions  #
@@ -1659,7 +1644,6 @@ class Ui_MainWindow(object):
             self.output_dir = directory
         except:
             print("Directory not valid!")
-        return()
 
     def define_SAVparams(self):
         from os.path import expanduser
@@ -1669,7 +1653,6 @@ class Ui_MainWindow(object):
             scope.define_SAVparams_file(filename[0][0])
         except:
             print('No proper file selected.')
-        return()
     
     def define_roughmillprotocol(self):
         from os.path import expanduser
@@ -1678,7 +1661,6 @@ class Ui_MainWindow(object):
             self.roughmillprotocol=filename[0][0]
         except:
             print('No proper file selected.')
-        return()
 
     def define_finemillprotocol(self):
         from os.path import expanduser
@@ -1687,7 +1669,6 @@ class Ui_MainWindow(object):
             self.finemillprotocol=filename[0][0]
         except:
             print('No proper file selected.')
-        return()
 
     def define_custommillprotocol(self):
         from os.path import expanduser
@@ -1696,7 +1677,6 @@ class Ui_MainWindow(object):
             self.custommillprotocol=filename[0][0]
         except:
             print('No proper file selected.')
-        return()
 
     def define_custompatternfile(self):
         from os.path import expanduser
@@ -1705,8 +1685,6 @@ class Ui_MainWindow(object):
             self.custompatternfile=filename[0][0]
         except:
             print('No proper file selected.')
-        return()
-
 
     def save_settings(self):
 
@@ -1729,8 +1707,6 @@ class Ui_MainWindow(object):
         except:
             print(sys.exc_info())
 
-        return()
-
     def save_settings_func(self,settings_file):
 
         try:
@@ -1751,8 +1727,6 @@ class Ui_MainWindow(object):
             self.settings = settings_file
         except:
             print(sys.exc_info())
-
-        return ()
 
     def load_settings(self):
         try:
@@ -1778,8 +1752,6 @@ class Ui_MainWindow(object):
         except:
             print("Please choose a valid setting file")
             print(sys.exc_info())
-
-        return()
 
     def load_settings_func(self,file):
 
@@ -1807,9 +1779,6 @@ class Ui_MainWindow(object):
         scope.define_output_dir(self.output_dir)
         scope.define_SAVparams_file(self.SAVparamsfile)
 
-
-        return()
-
 ####################################
 # /CODE:Define buttons             #
 ####################################
@@ -1823,7 +1792,6 @@ class Ui_MainWindow(object):
         number=self.ImageBufferHandle
         for i in item:
             self.scene.removeItem(i)
-        return()
 
     
     def toggleFullScreen(self):
@@ -1934,7 +1902,7 @@ class Ui_MainWindow(object):
                 pickle.dump(session_dict,pickle_out)
         except:
             print("No Session file saved!")
-        return()
+
 ####################################
 #/CODE: Diverse functions          #
 ####################################
@@ -1995,7 +1963,6 @@ class Ui_MainWindow(object):
             print("Something went wrong with the setup.")
             print(sys.exc_info())
         self.progressDialog.close()
-        return()
 
     def fineprotocol(self):
         self.number
@@ -2047,7 +2014,6 @@ class Ui_MainWindow(object):
             print("Something went wrong with the setup.")
             print(sys.exc_info())
         self.progressDialog.close()
-        return()
 
     def trenchmill(self):
         self.number
@@ -2101,8 +2067,6 @@ class Ui_MainWindow(object):
             print(sys.exc_info())
         self.progressDialog.close()
         #self.runRoughMill2_Done('Rough Mill stopped')
-        return()
-
 
     def customprotocol(self):
         self.number
@@ -2156,8 +2120,6 @@ class Ui_MainWindow(object):
             print(sys.exc_info())
         self.progressDialog.close()
 
-        return()
-
     def volumeimaging(self):
         try:
 
@@ -2208,9 +2170,6 @@ class Ui_MainWindow(object):
             print(sys.exc_info())
         self.progressDialog.close()
 
-        return()
-
-
     def custompatternfilerun(self):
         try:
 
@@ -2260,8 +2219,6 @@ class Ui_MainWindow(object):
             print(sys.exc_info())
         self.progressDialog.close()
 
-        return()
-
 ####################################
 #/CODE:Define Run button Functions #
 ####################################
@@ -2293,7 +2250,7 @@ class Ui_MainWindow(object):
 
         if  executed == QtWidgets.QDialog.Rejected:
             print("No new session")
-            return None
+            return
         
         elif executed == QtWidgets.QDialog.Accepted:
             print("New session")
@@ -2314,11 +2271,7 @@ class Ui_MainWindow(object):
             #self.tableWidget.clear()
             for i in range(self.tableWidget.rowCount()):
                 self.tableWidget.removeRow(i)
-            return None
-        
-        
-        return()
-        
+            return
 
     def load_session(self):
         try:
@@ -2372,10 +2325,6 @@ class Ui_MainWindow(object):
         except:
             print("No Session File loaded")
 
-        
-
-        
-        return()
 
 ####################################
 #/CODE:Session Functions           #
@@ -2432,10 +2381,6 @@ class Ui_MainWindow(object):
         ui=Ui_ScriptEditor()
         ui.setupUi(widget,stagepositions,images,patterns)
         widget.exec_()
-
-        return()
-
-
     
     def open_patterneditor(self):
 
@@ -2443,20 +2388,18 @@ class Ui_MainWindow(object):
         ui=Ui_PatternFileEditor()
         ui.setupUi(widget)
         widget.exec_()
-        return()
+
     def open_volumedesigner(self):
         widget=QtWidgets.QDialog()
         ui=Ui_VolumeDesigner()
         ui.setupUi(widget)
         widget.exec_()
-        return()
 
     def open_lamelladesigner(self):
         widget=QtWidgets.QDialog()
         ui=Ui_LamellaDesigner()
         ui.setupUi(widget)
         widget.exec_()
-        return()
 
 ####################################
 #/CODE: "Tools" Functions          #
@@ -2492,10 +2435,7 @@ class Ui_MainWindow(object):
 
                         items2[i].setSelected(True)
                         item.append(items2[i])
-            if item==[]:
-
-                return()
-            else:
+            if item:
 
                 patterns=[]
 
@@ -2505,13 +2445,11 @@ class Ui_MainWindow(object):
 
                 self.copy=patterns
 
-
     def paste_patterns(self):
         print('paste_patterns')
         for i in self.copy:
             scene=self.graphicsView.scene.addItem(Rectangle(i[0],i[1],i[2],i[3]))
 
-        return()
 ####################################
 #/CODE:Pattern handling Functions  #
 ####################################
@@ -2735,8 +2673,8 @@ class TrenchMillThread(QtCore.QThread):
                     alignment_image = ui.ImageBufferImages[image_number]
 
                     pattern_dir = ui.output_dir + '/' + str(label) + '/'
-                    log_out_new = scope.run_trench_milling(label, alignment_image, stagepos, pattern_dir)
-                    ui.log_out = ui.log_out + log_out_new
+                    new_log = scope.run_trench_milling(label, alignment_image, stagepos, pattern_dir)
+                    ui.log_out += ''.join(line + '\n' for line in new_log)
 
                 ui.sysout.write(ui.log_out)
 
@@ -2786,8 +2724,6 @@ class RoughProtocolThread(QtCore.QThread):
                         alignment_image = ui.ImageBufferImages[image_number]
 
                         pattern_dir = ui.output_dir + '/' + str(label) + '/'
-
-
 
                         protocolfile = ui.roughmillprotocol
                         log_out_new = scope.run_milling_protocol(label, alignment_image, stagepos, pattern_dir,
@@ -2868,8 +2804,8 @@ class FineProtocolThread(QtCore.QThread):
             ui.progressDialog.close()
 
     def stop(self):
-        self.continuerun=False
-        return()
+        self.continuerun = False
+
 
 class VolumeImagingThread(QtCore.QThread):
     signal = pyqtSignal('PyQt_PyObject')
@@ -2914,8 +2850,8 @@ class VolumeImagingThread(QtCore.QThread):
 
 
                         paramsfile = ui.SAVparamsfile
-                        log_out_new = scope.run_SAV(label, alignment_image, stagepos, pattern_dir, paramsfile)
-                        ui.log_out = ui.log_out + log_out_new
+                        new_log = scope.run_SAV(label, alignment_image, stagepos, pattern_dir, paramsfile)
+                        ui.log_out += ''.join(line + '\n' for line in new_log)
 
                     ui.sysout.write(ui.log_out)
 
@@ -2970,10 +2906,9 @@ class CustomPatternfileThread(QtCore.QThread):
 
 
                         protocolfile = ui.custompatternfile
-                        log_out_new = scope.run_milling_custom(label, alignment_image, stagepos, pattern_dir,
-                                                               protocolfile)
+                        new_log = scope.run_milling_custom(label, alignment_image, stagepos, pattern_dir, protocolfile)
 
-                        ui.log_out = ui.log_out + log_out_new
+                        ui.log_out += ''.join(line + '\n' for line in new_log)
 
                     ui.sysout.write(ui.log_out)
 
@@ -3033,9 +2968,8 @@ class CustomProtocolThread(QtCore.QThread):
 
 
                         protocolfile = ui.custommillprotocol
-                        log_out_new = scope.run_milling_protocol(label, alignment_image, stagepos, pattern_dir,
-                                                                 protocolfile)
-                        ui.log_out = ui.log_out + log_out_new
+                        new_log = scope.run_milling_protocol(label, alignment_image, stagepos, pattern_dir, protocolfile)
+                        ui.log_out += ''(line + '\n' for line in new_log)
 
                     ui.sysout.write(ui.log_out)
 
@@ -3048,6 +2982,8 @@ class CustomProtocolThread(QtCore.QThread):
             print(sys.exc_info())
 
             ui.progressDialog.close()
+
+
 ####################################
 #/CODE:Threads for mill running    #
 ####################################
