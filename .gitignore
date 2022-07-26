@@ -7,4 +7,9 @@ tmp.py
 pickle.tmp
 #Documentation in construction
 documentation/
+src/Zeiss/__pycache__
+src/Zeiss/ExampleFiles
+src/Zeiss/OldFiles
+src/Zeiss/Workfiles
+src/Zeiss/.ipynb_checkpoints
 

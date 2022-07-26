@@ -1,0 +1,27 @@
+<ELAYOUT locked="false" name="layout001" version="2.0">
+
+  <VERSION created="12.05.2022 16:38:00" modified="12.05.2022 16:38:00" number="1.0" />
+
+  <AXES show="true" />
+
+  <GRID horizontal="1" show="true" snap_to="false" vertical="1" />
+
+  <LAYER_LIST>
+    <LAYER fill_color="#00FF00" fill_opacity="0.5" hidden="false" locked="false" name="Layer">
+        </LAYER>
+  </LAYER_LIST>
+
+  <STRUCTURE_LIST>
+    <STRUCTURE locked="false" name="Structure">
+      <VERSION created="12.05.2022 16:38:00" modified="12.05.2022 16:38:00" number="1.0" />
+      <INSTANCE_LIST />
+      <LAYER_REFERENCE frame_cx="0" frame_cy="0" frame_size="100" ref="Layer">
+        <RECT angle="0 deg" edge_sel_auto_scan_angle="true" height="-12.9754" imaging="false" width="19.3009" x="-4.86579" y="0.0">
+            </RECT>
+        <RECT angle="0 deg" edge_sel_auto_scan_angle="true" height="-12.0023" imaging="false" width="27.2484" x="-7.94745" y="0.0">
+            </RECT>
+      </LAYER_REFERENCE>
+    </STRUCTURE>
+  </STRUCTURE_LIST>
+
+</ELAYOUT>

@@ -1,0 +1,3 @@
+img1=fibsem.take_image_IB()
+
+fibsem.align_test(img1,'ION')
