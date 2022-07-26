@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ELAYOUT version="2.0" locked="false" name="layout001">
+
+  <VERSION created="12.05.2022 16:38:00" modified="12.05.2022 16:38:00" number="1.0"/>
+
+  <AXES show="true"/>
+
+  <GRID horizontal="1" show="true" snap_to="false" vertical="1"/>
+
+  <LAYER_LIST>
+    <LAYER fill_color="#00FF00" fill_opacity="0.5" hidden="false" locked="false" name="Layer">
+        </LAYER>
+  </LAYER_LIST>
+
+  <STRUCTURE_LIST>
+    <STRUCTURE locked="false" name="Structure">
+      <VERSION created="12.05.2022 16:38:00" modified="12.05.2022 16:38:00" number="1.0"/>
+      <INSTANCE_LIST/>
+      <LAYER_REFERENCE frame_cx="0" frame_cy="0" frame_size="100" ref="Layer">
+        <RECT edge_sel_auto_scan_angle="true" height="-12.9754" width="19.3009" angle="0 deg" x="-4.86579" y="-10.7858" imaging="false">
+          <EXPOSURE version="2.1" column_type="FIB" purpose="FIB milling" computed_parameter="by purpose" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="1e-006 s" dwell_times_image="1e-006 s" delay="none" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="10 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="50 %" pixel_spacing_line="50 %" track_spacing="50 %" description="">
+          <PROBE name="30kV:700pA" type="specific" current="7e-010 A" diameter="1.8e-008 m"/>
+          <GIS name="unchanged" channel="0" category="0" type="unchanged" ack="false" autopark="false" offset="false" usegas="false"/>
+          </EXPOSURE>
+	    </RECT>
+      </LAYER_REFERENCE>
+    </STRUCTURE>
+  </STRUCTURE_LIST>
+
+</ELAYOUT>
