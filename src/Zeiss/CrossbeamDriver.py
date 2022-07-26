@@ -212,7 +212,7 @@ class fibsem:
         #self.disconnect()
         #path=r'D:/Images/RoSa/Images/test.tif'
         #image_output=r'c:/Users/Sven/Pictures/test.tif'
-        path=r'C:/Users/Sven/Pictures/test.tif'
+        path=r'C:/Users/Sven/Pictures/test3.tif'
         #time.sleep(1)
         img=cv2.imread(path)
         #print(img)
@@ -1037,20 +1037,24 @@ class fibsem:
         Action: None
         '''
         pattern_above = self.pattern_parser(directory, pattern_above)
-        start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+        #start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+        start_position_above = pattern_above.center_y + pattern_above.height
         pattern_below = self.pattern_parser(directory, pattern_below)
-        start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+        #start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+        start_position_below = pattern_below.center_y
         pattern_lamella = self.pattern_parser(directory, pattern_lamella)
         lamella_center_x = pattern_lamella.center_x
-        lamella_center_y = pattern_lamella.center_y
+
+        # CODE CHANGES FOR TFS TO ZEISS CONVENTION
+        lamella_center_y = pattern_lamella.center_y + 0.5 * pattern_lamella.height
         width_lamella = pattern_lamella.width
 
         ### DOESNT EXIST FOR ZEISS ###
         #microscope.patterning.clear_patterns()
 
-        from src.makePatterns_LamellaDesigner import make_protocol
-        from src.makePatterns_LamellaDesigner import read_protocolfile
-        from src.makePatterns_LamellaDesigner import write_protocolfile
+        from src.Zeiss.makePatterns_LamellaDesigner import make_protocol
+        from src.Zeiss.makePatterns_LamellaDesigner import read_protocolfile
+        from src.Zeiss.makePatterns_LamellaDesigner import write_protocolfile
         protocolfile_lists=read_protocolfile(protocol_filename)
         for i in protocolfile_lists:
             i.update({'width':width_lamella})
@@ -1078,7 +1082,8 @@ class fibsem:
                     if IB_Current == 0:
                         IB_Current = 1e-11
                 except:
-                    center_y = lamella_center_y - float(j['Offset_y'])
+                    ### COMMENTED OUT TO ADJUST TO ZEISS CONVENTION
+                    center_y = lamella_center_y - float(j['Offset_y']) #+ pattern_lamella.height
                     center_x = lamella_center_x + float(j['Offset_x'])
                     height = float(j['Height_y'])
                     if j['Width_x'] == "'Lamella'":
