@@ -239,6 +239,12 @@ class Ui_LamellaDesigner(object):
         self.Value_Pattern.setMinimum(-100)
         self.Value_Lamella.setMinimum(-100)
 
+        self.Value_WidthRed.setMaximum(1000)
+        # self.Value_Height.setMinimum(-100)
+        self.Value_Pattern.setMaximum(1000)
+        self.Value_Lamella.setMaximum(1000)
+
+
         self.Value_Time.setMaximum(1000)
 
 

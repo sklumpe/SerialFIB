@@ -266,12 +266,15 @@ class Ui_PatternFileEditor(object):
         #self.PatternTypeBox.currentIndexChanged.connect(self.showPattern)
 
 
-
-        self.Value_Width.setMinimum(-100)
-        self.Value_Height.setMinimum(-100)
-        self.Value_OffsetX.setMinimum(-100)
-        self.Value_OffsetY.setMinimum(-100)
-
+        self.Value_Width.setMinimum(-1000)
+        self.Value_Width.setMaximum(1000)
+        self.Value_Height.setMinimum(-1000)
+        self.Value_Height.setMaximum(1000)
+        self.Value_OffsetX.setMinimum(-1000)
+        self.Value_OffsetX.setMaximum(1000)
+        self.Value_OffsetY.setMinimum(-1000)
+        self.Value_OffsetY.setMaximum(1000)
+        self.Value_Time.setMaximum(100000)
 
 
         self.step_list=[]

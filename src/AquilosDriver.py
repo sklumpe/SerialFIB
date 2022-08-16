@@ -339,6 +339,7 @@ class fibsem:
 
                 # Run auto contrast brightness and reset beam shift. Take an image as reference for alignment
                 microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
+                #microscope.beams.ion_beam.horizontal_field_width.value =
                 microscope.auto_functions.run_auto_cb()
                 microscope.beams.ion_beam.beam_shift.value=Point(0,0)
                 current_img=self.take_image_IB()
@@ -1269,7 +1270,7 @@ class fibsem:
 
         self.moveStageAbsolute(stagepos)
         ref_img.save(patterns_output_directory[:-1] + '/initial_fine_alignment_img.tif')
-        #self.align(ref_img,'ION')
+        self.align(ref_img,'ION')
 
         for i in range(0,step_num):
             if self.continuerun:
