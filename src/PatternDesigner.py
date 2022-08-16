@@ -663,6 +663,8 @@ class Ui_PatternFileEditor(object):
                 for k in range(len(patterns)):
                     if "IB_Current" in patterns[k]:
                         step.IB_Current=float(patterns[k]["IB_Current"].split('=')[1])
+                        if k == 0: 
+                            self.Value_IB_Current.setValue(step.IB_Current)
                     else:
                         pattern_param=patterns[k]
 
@@ -700,6 +702,24 @@ class Ui_PatternFileEditor(object):
 
             self.step_dict=step_dict
             self.step_list=step_list
+
+            patterns=pattern_dict[0]
+            #print(patterns[1])
+            print(self.step_list[0])
+            #self.listWidget_Steps.setSelection(self.listWidget_Steps.item(0))
+            self.listWidget_Steps.setCurrentRow(0)
+            self.showInStepView()
+            self.listWidget_Patterns.setCurrentRow(0)
+            print(float(patterns[1]['Height_y']))
+            self.Value_Height.setValue(float(patterns[1]['Height_y'])*1e06)
+            self.Value_Width.setValue(float(patterns[1]['Width_x'])*1e06)
+            self.Value_OffsetX.setValue(float(patterns[1]['Offset_x'])*1e06)
+            self.Value_OffsetY.setValue(float(patterns[1]['Offset_y'])*1e06)
+            
+            self.showInPatternView()
+            #self.listWidget_Patterns.setSelection(0)
+            #self.Value_Height.setValue(float(patterns[1]['Height_y'])*1e06)
+            #self.showPattern()
         except:
             print("No patternfile selected or file seems to be corrupt.")
             print(sys.exc_info())
