@@ -712,10 +712,13 @@ class Ui_LamellaDesigner(object):
             #self.Value_Height.setValue(float(patterns[0].height)*1e06)
             self.showInPatternView()
 
-            print(float(pattern['thickness_patterns'])*1e06)
+            #print(float(pattern['thickness_patterns'])*1e06)
             self.Value_Pattern.setValue(float(pattern['thickness_patterns'])*1e06)
             self.Value_Lamella.setValue(float(pattern['thickness_lamella'])*1e06)
             self.Value_Time.setValue(float(pattern['time']))
+            self.PatternTypeBox.setCurrentText(str(pattern['pattern_type']))
+            self.PatternDirectionBox.setCurrentText(str(pattern['side']))
+            
             #self.Value_Time.setValue(pattern.time)
             
 

@@ -663,8 +663,7 @@ class Ui_PatternFileEditor(object):
                 for k in range(len(patterns)):
                     if "IB_Current" in patterns[k]:
                         step.IB_Current=float(patterns[k]["IB_Current"].split('=')[1])
-                        if k == 0: 
-                            self.Value_IB_Current.setValue(step.IB_Current)
+ 
                     else:
                         pattern_param=patterns[k]
 
@@ -675,6 +674,11 @@ class Ui_PatternFileEditor(object):
                         offset_x=pattern_param['Offset_x']
                         height=pattern_param['Height_y']
                         width=pattern_param['Width_x']
+                        try:
+                            time=float(pattern_param['Time'])
+                        except:
+                            ### Time already assigned ##
+                            pass
                         #except:
                         #    print("Pattern not defined correctly")
                         try:
@@ -692,7 +696,8 @@ class Ui_PatternFileEditor(object):
                                             width=float(width)*1000000,
                                             height=float(height)*1000000,
                                             scan_direction=scan_direction,
-                                            scan_type=scan_type)
+                                            scan_type=scan_type,
+                                            time=time)
                         pattern_list.append(pattern)
                 #print(pattern_list)
                 step.patterns=pattern_list
@@ -702,19 +707,28 @@ class Ui_PatternFileEditor(object):
 
             self.step_dict=step_dict
             self.step_list=step_list
+            
 
             patterns=pattern_dict[0]
-            #print(patterns[1])
-            print(self.step_list[0])
+            #print(patterns)
+            #print(self.step_list[0])
+            #print(pattern_dict)
+            #print(steps_current)
             #self.listWidget_Steps.setSelection(self.listWidget_Steps.item(0))
             self.listWidget_Steps.setCurrentRow(0)
             self.showInStepView()
             self.listWidget_Patterns.setCurrentRow(0)
-            print(float(patterns[1]['Height_y']))
+            #print(float(patterns[1]['Height_y']))
             self.Value_Height.setValue(float(patterns[1]['Height_y'])*1e06)
             self.Value_Width.setValue(float(patterns[1]['Width_x'])*1e06)
             self.Value_OffsetX.setValue(float(patterns[1]['Offset_x'])*1e06)
             self.Value_OffsetY.setValue(float(patterns[1]['Offset_y'])*1e06)
+            self.Value_Time.setValue(float(patterns[1]['Time']))
+            #self.Value_OffsetY.setValue(float(patterns[1]['Offset_y'])*1e06)
+            self.PatternDirectionBox.setCurrentText(patterns[1]['ScanDirection'])
+            self.PatternTypeBox.setCurrentText(patterns[1]['PatternType'])
+            #IB
+            self.Value_IB_Current.setValue(float(steps_current[0])*1e09)
             
             self.showInPatternView()
             #self.listWidget_Patterns.setSelection(0)
@@ -733,6 +747,7 @@ class Ui_PatternFileEditor(object):
         steps=[]
         step=[]
         step_names=[]
+        #step_times=[]
         with open(custom_filename,'r') as input_file:
             inRecordingMode = False
             for line in input_file.readlines():
@@ -743,6 +758,8 @@ class Ui_PatternFileEditor(object):
                     steps_current.append(line.split('=')[1])
                 if line.startswith("Step_Name="):
                     step_names.append(line.split('=')[1][:-1])
+                #if line.startswith("Time"):
+                #    step_times.append(line.split('=')[1][:-1])
                 if not inRecordingMode:
                     if line.startswith('Step='):
                         inRecordingMode = True
@@ -763,6 +780,8 @@ class Ui_PatternFileEditor(object):
             for j in i:
                 if j.startswith('#'):
                     pass
+                if j.startswith('Time'):
+                    pattern.update({j.split('=')[0]:j.split('=')[1][:-1]})
                 if not inRecordingMode:
                     if j.startswith('Pattern'):
                         inRecordingMode = True
