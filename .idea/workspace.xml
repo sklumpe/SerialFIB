@@ -24,8 +24,8 @@
       <file leaf-file-name="LamellaDesigner.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LamellaDesigner.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="567">
-              <caret line="245" column="0" lean-forward="true" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
+            <state relative-caret-position="621">
+              <caret line="247" column="42" lean-forward="true" selection-start-line="247" selection-start-column="42" selection-end-line="247" selection-end-column="42" />
               <folding />
             </state>
           </provider>
@@ -34,8 +34,8 @@
       <file leaf-file-name="PatternDesigner.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PatternDesigner.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="268" column="0" lean-forward="false" selection-start-line="268" selection-start-column="0" selection-end-line="276" selection-end-column="42" />
+            <state relative-caret-position="510">
+              <caret line="276" column="41" lean-forward="false" selection-start-line="276" selection-start-column="35" selection-end-line="276" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -58,7 +58,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="85" />
     <option name="y" value="-21" />
     <option name="width" value="1932" />
@@ -118,7 +118,7 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-6" y="-6" width="1932" height="1182" extended-state="6" />
+    <frame x="-6" y="-6" width="1932" height="1182" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -177,16 +177,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/PatternDesigner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="268" column="0" lean-forward="false" selection-start-line="268" selection-start-column="0" selection-end-line="276" selection-end-column="42" />
+        <state relative-caret-position="510">
+          <caret line="276" column="41" lean-forward="false" selection-start-line="276" selection-start-column="35" selection-end-line="276" selection-end-column="41" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/LamellaDesigner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="245" column="0" lean-forward="true" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
+        <state relative-caret-position="621">
+          <caret line="247" column="42" lean-forward="true" selection-start-line="247" selection-start-column="42" selection-end-line="247" selection-end-column="42" />
           <folding />
         </state>
       </provider>

@@ -245,7 +245,7 @@ class Ui_LamellaDesigner(object):
         self.Value_Lamella.setMaximum(1000)
 
 
-        self.Value_Time.setMaximum(1000)
+        self.Value_Time.setMaximum(100000)
 
 
         self.step_list=[]
