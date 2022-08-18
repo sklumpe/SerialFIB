@@ -39,7 +39,7 @@ try:
 
     from autoscript_toolkit.template_matchers import * 
     import autoscript_toolkit.vision as vision_toolkit
-    from src.custom_matchers_v2 import *
+    from src.custom_matchers_v3 import *
 except:
     print("No Autoscript installed")
 
@@ -310,6 +310,11 @@ class fibsem:
         stagepos=StagePosition(x=x,y=y,z=z,t=t,r=r)
         microscope.specimen.stage.relative_move(stagepos)
         return("Stage Moved")
+    def print_stage_rot(self):
+        print(microscope.beams.ion_beam.scanning.rotation.value)
+        return None
+
+
     def align(self,image,beam,current=1.0e-11):
         '''
         Input: Alignment image, Beam ("ION" or "ELECTRON"), optionally current but replaced by the GUI option
@@ -346,7 +351,8 @@ class fibsem:
 
 
                 # Load Matcher function and locate feature
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                #favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                favourite_matcher = CustomCVMatcher('phase')
                 l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
                 print("Current confidence: " + str(l.confidence))
                 self.log_output=self.log_output+"Step Clarification: Initial Alignment after Stage move \n"
@@ -377,11 +383,19 @@ class fibsem:
                         # move stage and reset beam shift
                         print("Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift...")
                         self.log_output = self.log_output + "Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift... \n"
-                        rotation=microscope.beams.electron_beam.scanning.rotation.value
+                        rotation=microscope.beams.ion_beam.scanning.rotation.value
+                        print(rotation)
                         possible_rotations=[0,3.14]
                         #print(min(possible_rotations, key=lambda x: abs(x - rotation)))
 
-                        pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        if rotation==0:
+
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
+
+                            print('Rotation is zero')
+                        else:
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                            print('Rotation is NOT zero')
                         microscope.specimen.stage.relative_move(pos_corr)
                         microscope.beams.ion_beam.beam_shift.value = Point(0,0)
 
@@ -450,8 +464,9 @@ class fibsem:
                         print(num)
                         if num==0:
                             pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
-                        if num==3.14:
+                        else:
                             pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
                         microscope.specimen.stage.relative_move(pos_corr)
                         microscope.beams.electron_beam.beam_shift.value = Point(0,0)
 
@@ -489,7 +504,8 @@ class fibsem:
                 current_img = self.take_image_IB()
 
 
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                #favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                favourite_matcher = CustomCVMatcher('phase')
                 l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
                 print("Current confidence: " + str(l.confidence))
 
@@ -513,7 +529,18 @@ class fibsem:
                         print("Moving stage by (" + str(x) + "," + str(y) + ") and resetting beam shift...")
                         self.log_output = self.log_output + "Moving stage by (" + str(x) + "," + str(
                             y) + ") and resetting beam shift... \n"
-                        pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+
+                        rotation = microscope.beams.ion_beam.scanning.rotation.value
+                        print(rotation)
+                        possible_rotations = [0, 3.14]
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        if rotation==0:
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
+                            print('Rotation is zero')
+                        else:
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                            print('Rotation is NOT zero')
                         microscope.specimen.stage.relative_move(pos_corr)
                         microscope.beams.ion_beam.beam_shift.value = Point(0, 0)
 

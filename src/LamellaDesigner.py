@@ -720,7 +720,8 @@ class Ui_LamellaDesigner(object):
             self.PatternDirectionBox.setCurrentText(str(pattern['side']))
             
             #self.Value_Time.setValue(pattern.time)
-            
+            self.showInStepView()
+            self.showInPatternView()
 
 
             #self.Value_Width.setValue(float(patterns[0]['Width_x'])*1e06)

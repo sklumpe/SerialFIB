@@ -731,6 +731,9 @@ class Ui_PatternFileEditor(object):
             self.Value_IB_Current.setValue(float(steps_current[0])*1e09)
             
             self.showInPatternView()
+
+            self.showInStepView()
+            self.showInPatternView()
             #self.listWidget_Patterns.setSelection(0)
             #self.Value_Height.setValue(float(patterns[1]['Height_y'])*1e06)
             #self.showPattern()
