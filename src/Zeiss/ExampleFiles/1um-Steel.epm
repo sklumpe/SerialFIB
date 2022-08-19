@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<EXPOSURE version="2.1" column_type="FIB" purpose="FIB milling" computed_parameter="dwell time" cycles_area="2" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="5e-006 s" dwell_times_image="1e-006 s" delay="medium" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="4000 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="25 %" pixel_spacing_line="0 m" track_spacing="5 %" gauging="1e-006 m" description="">
+</EXPOSURE>

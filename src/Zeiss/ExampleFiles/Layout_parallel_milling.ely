@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ELAYOUT version="2.0" locked="false" name="Layout_parallel_milling">
+
+  <VERSION created="06.07.2022 00:15:15" modified="06.07.2022 00:15:15" number="1.0"/>
+
+  <AXES show="true"/>
+
+  <GRID horizontal="1" show="true" snap_to="false" vertical="1"/>
+
+  <LAYER_LIST>
+    <LAYER fill_color="#00FF00" fill_opacity="0.5" hidden="false" locked="false" name="Layer">
+        </LAYER>
+  </LAYER_LIST>
+
+  <STRUCTURE_LIST>
+    <STRUCTURE locked="false" name="Structure">
+      <VERSION created="06.07.2022 00:15:15" modified="06.07.2022 00:15:15" number="1.0"/>
+      <INSTANCE_LIST/>
+      <LAYER_REFERENCE frame_cx="0" frame_cy="0" frame_size="100" ref="Layer">
+        <RECT dose_factor="0.625028" edge_sel_auto_scan_angle="true" height="3.75018" width="16.9651" angle="0 deg" x="-14.3208" y="3.35821" imaging="false">
+          <EXPOSURE version="2.0" column_type="FIB" purpose="FIB milling" computed_parameter="dwell time" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="1e-006 s" dwell_times_image="1e-006 s" delay="medium" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="50 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="50 %" pixel_spacing_line="0 m" track_spacing="50 %" gauging="1e-006 m" description="">
+          </EXPOSURE>
+            </RECT>
+        <CROSSSECTION dose_factor="9.37543" edge_sel_auto_scan_angle="true" x="-13.073" y="4.59577" width_a="14.4694" width_b="14.4729" offset_c="-0.00176327" height="-0.01">
+          <EXPOSURE version="2.0" column_type="FIB" purpose="FIB milling" computed_parameter="dwell time" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="1e-006 s" dwell_times_image="1e-006 s" delay="medium" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="50 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="50 %" pixel_spacing_line="0 m" track_spacing="50 %" gauging="1e-006 m" description="">
+          </EXPOSURE>
+            </CROSSSECTION>
+        <CROSSSECTION dose_factor="9.37543" edge_sel_auto_scan_angle="true" x="-13.073" y="5.87083" width_a="14.4694" width_b="14.4729" offset_c="-0.00176327" height="0.01">
+          <EXPOSURE version="2.0" column_type="FIB" purpose="FIB milling" computed_parameter="dwell time" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="1e-006 s" dwell_times_image="1e-006 s" delay="medium" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="50 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="50 %" pixel_spacing_line="0 m" track_spacing="50 %" gauging="1e-006 m" description="">
+          </EXPOSURE>
+            </CROSSSECTION>
+        <CROSSSECTION dose_factor="9.37543" edge_sel_auto_scan_angle="true" x="-13.0712" y="4.60577" width_a="14.4659" width_b="14.5293" offset_c="-0.0317389" height="-0.18">
+          <EXPOSURE version="2.0" column_type="FIB" purpose="FIB milling" computed_parameter="dwell time" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="1e-006 s" dwell_times_image="1e-006 s" delay="medium" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="50 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="50 %" pixel_spacing_line="0 m" track_spacing="50 %" gauging="1e-006 m" description="">
+          </EXPOSURE>
+            </CROSSSECTION>
+        <CROSSSECTION dose_factor="9.37543" edge_sel_auto_scan_angle="true" x="-13.0712" y="5.86083" width_a="14.4659" width_b="14.5293" offset_c="-0.0317389" height="0.18">
+          <EXPOSURE version="2.0" column_type="FIB" purpose="FIB milling" computed_parameter="dwell time" dwell_times_point="1e-006 s" dwell_times_line="1e-006 s" dwell_times_area="1e-006 s" dwell_times_image="1e-006 s" delay="medium" cycle_delay="0 s" dose_image="0 C/m&#178;" dose_area="50 C/m&#178;" dose_line="0 C/m" dose_point="0 C" pause="false" scanning_mode_fast="by purpose" scanning_mode_cycle_mode="by purpose" pixel_spacing_image="0 m" pixel_spacing_area="50 %" pixel_spacing_line="0 m" track_spacing="50 %" gauging="1e-006 m" description="">
+          </EXPOSURE>
+            </CROSSSECTION>
+        <POLYGON points="(31.1977 10.7506) (33.4706 23.6406) (14.4555 23.6406) (16.7284 10.7506) (34.1677 -6.55146) (31.8948 6.33854) (17.4255 6.33854) (15.1526 -6.55146) " contours="0 4 ">
+            </POLYGON>
+      </LAYER_REFERENCE>
+    </STRUCTURE>
+  </STRUCTURE_LIST>
+
+</ELAYOUT>

@@ -16,6 +16,10 @@ import shutil
 
 from time import sleep
 from typing import List, Pattern, Tuple
+try:
+    from read_probe_table import *
+except:
+    from src.Zeiss.read_probe_table import *
 import numpy as np
 #from SEM_API import SEM_API
 try:
@@ -23,6 +27,8 @@ try:
 except ModuleNotFoundError:
     from SEM_API import SEM_API
 import math
+
+#global probe_table_path
 
 #image_output=r'C:/Users/Sven/Pictures/test.tif'
 class Point:
@@ -142,8 +148,20 @@ class BeamShift():
 # TODO:
 class BeamCurrent():
     def __init__(self, sem: SEM_API) -> None:
+        self._source = "Ion"
         self._value = 0.0e-9
         self._sem = sem
+        #self.probe_table = readProbeTable(probe_table_path)
+        #self.probe_table = readProbeTable(r"D:/Images/RoSa/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml")
+        self.probe_table = r"D:/Images/RoSa/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml"
+    @property
+    def source(self) -> str:
+        """Get the set beam current"""
+        return self._source
+
+    @source.setter
+    def source(self, source) -> None:
+        self._source = "Ion"
 
     @property
     def value(self) -> float:
@@ -153,12 +171,18 @@ class BeamCurrent():
     @value.setter
     def value(self, value) -> None:
         """set the available beam current that is closest to the required one"""
+        # print(getProbe(value, self.probe_table))
+        # probeDict=getProbe(value, self.probe_table)
+        # print(probeDict['name'])
         if self._sem is not None:
-            self._sem.SetValue("AP_IPROBE", value)
-            #TODO make sure this command is executed some event?
+            if self._source == "Ion": 
+                probeDict=getProbe(value, self.probe_table)
+            
+                self._sem.SetState("DP_FIB_IMAGE_PROBE", probeDict['name'])
+            else: self._sem.SetValue("AP_IPROBE", value)
+            #TODO distinguish between Gemini 1 and 2
         self._value = value
-
-
+        #print(getProbe(self._value, self.probe_table))
 # TODO:
 class FieldOfView():
     def __init__(self) -> None:
@@ -176,17 +200,18 @@ class FieldOfView():
 
 # TODO: do not implement
 class IonBeam():
-    def __init__(self) -> None:
+    def __init__(self, sem: SEM_API) -> None:
         self._is_blanked = True
         self._horizontal_field_width = FieldOfView()
         self.scanning = Scanning()
-        self._beam_shift = BeamShift(None)
-        self._beam_current = BeamCurrent(None)
+        self._beam_shift = BeamShift(sem)
+        self._beam_current = BeamCurrent(sem)
 
         self.scanning.resolution.value = "1024 * 768"
         self.scanning.dwell_time.value = 200e-09
         self._beam_shift.value = Point(0, 0)
-        self._beam_current.value = 500e-9
+        #self._beam_current.value = 500e-9
+        self._beam_current.source = "Ion"
 
     def turn_on(self):
         pass
@@ -232,7 +257,7 @@ class ElectronBeam():
         self._scanning.resolution.value = "1024 * 768"
         self._scanning.dwell_time.value = 200e-09
         self._beam_shift.value = Point(0, 0)
-        self._beam_current.value = 500e-9
+        #self._beam_current.value = 500e-9
 
     def turn_on(self):
         self._sem.Execute("CMD_BEAM_ON")
@@ -276,7 +301,7 @@ class Beams():
         self.sem = sem
         self._beams = "Electon and Ion"
         self._electron_beam = ElectronBeam(sem)
-        self._ion_beam = IonBeam()
+        self._ion_beam = IonBeam(sem)
 
     def get_available_beams(self):
         return self._beams
@@ -290,6 +315,19 @@ class Beams():
     def ion_beam(self) -> IonBeam:
         """Get the current ion_beam object"""
         return self._ion_beam
+    
+    def change_beam(self,beam='ION') -> None:
+        if beam == "ION":
+            print('CHANGING TO ION BEAM IN CROSSBEAM')
+            self.sem.set_active_beam('ION')
+            self.freeze()
+        elif beam == "ELECTRON":
+            self.sem.set_active_beam('ELECTRON')
+            self.freeze()
+        return None
+    
+    def freeze(self,cmd="FREEZE"):
+        self.sem.freeze(cmd)
 
 
 # TODO: do not implement
@@ -321,6 +359,7 @@ class Patterning():
         self._sem.Execute("CMD_SMARTFIB_PREPARE_EXPOSURE")
         time.sleep(1)
         self._sem.Execute("CMD_FIB_START_MILLING")
+        self._sem.SetState("DP_PATTERNING_MODE","FIB")
         if testing:
             print('This is a test case for patterning as SerialFIB is run via a SmartSEM Simulation')
         else:
@@ -328,6 +367,16 @@ class Patterning():
                 time.sleep(0.3) 
             while self._sem.GetState("DP_FIB_MODE") == "Milling":
                 time.sleep(0.3) 
+    @property
+    def is_idle(self):
+        print('check idle')
+        if self._sem.GetState("DP_FIB_MODE")=="Milling":
+            #time.sleep(0.3)
+            idle=False
+        else:
+            idle=True
+            #time.sleep(0.3)
+        return idle
 
     @property
     def mode(self) -> str:
@@ -360,7 +409,7 @@ class GrabFrameSettings():
 class Imaging():
     def __init__(self, sem: SEM_API) -> None:
         self._sem = sem
-        self.image_output=r'C:/Users/Sven/Pictures/test.tif'
+        self.image_output=r'C:/api/Grab.tif'
 
     def set_active_device(self):
         """setting imaging column (FIB mode ... SEM or FIB)"""
@@ -482,6 +531,8 @@ class MicroscopeClient():
         self._specimen = Specimen(self._sem_api)
         self._auto_functions = AutoFunctions(self._sem_api)
         self._patterning = Patterning(self._sem_api)
+
+        #probe_table_path = probeTable
 
         print("Connecting microscope!")
 

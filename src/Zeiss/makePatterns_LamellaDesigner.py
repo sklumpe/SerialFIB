@@ -45,6 +45,8 @@ def makePatterns_LamellaDesigner(step,side,thickness_lamella,thickness_patterns,
 
 
     factors=[-1,1]
+    factors_rough=[0,-1]
+    factors_rough2=[1,-1]
     print(str(output_dir[:-1])+filename)
     if mode=='rough':
         scan_direction = ['TopToBottom', 'BottomToTop', 'TopToBottom']
@@ -74,9 +76,9 @@ def makePatterns_LamellaDesigner(step,side,thickness_lamella,thickness_patterns,
             output_file.write('IB_Current=' + str(milling_current) + '\n')
             for j in range(2):
                 output_file.write('Pattern=' + str(pattern_num[factors[j]]) + '\n')
-                output_file.write('Offset_y=' + str(offsets_y[j]) + '\n')
+                output_file.write('Offset_y=' + str(offsets_y[j]+factors_rough[j]*thicknesses[j]) + '\n')
                 output_file.write('Offset_x=0.0e-06' + '\n')
-                output_file.write('Height_y=' + str(thicknesses[j]) + '\n')
+                output_file.write('Height_y=' + str(factors_rough2[j]*thicknesses[j]) + '\n')
                 output_file.write('Width_x=' + str(width) + '\n')
                 output_file.write('PatternType=' + str(pattern_type) + '\n')
                 output_file.write('ScanDirection=' + str(scan_direction[factors[j]]) + '\n')
@@ -172,6 +174,9 @@ def make_protocol(parameter_list,mode='fine',y_min=None,y_max=None):
             if i==0:
                 makePatterns_LamellaDesigner(step, side, thickness_lamella, thickness_patterns, y_center, width,
                                              pattern_type, milling_current, output_dir, time, mode, y_min, y_max)
+            #if i==1:
+            #    makePatterns_LamellaDesigner(step, side, thickness_lamella, -thickness_patterns, y_center-thickness_patterns, width,
+            #                                 pattern_type, milling_current, output_dir, time)
             else:
                 makePatterns_LamellaDesigner(step, side, thickness_lamella, thickness_patterns, y_center, width,
                                              pattern_type, milling_current, output_dir, time)

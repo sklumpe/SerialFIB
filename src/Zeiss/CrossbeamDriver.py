@@ -76,6 +76,7 @@ class DummyAdorned():
         self.height=768
         #self.metadata.binary_result.pixel_size=1e-06
     def save(self,filepath):
+        cv2.imwrite(filepath,self.data)
         print("An Image should have been saved, to be implemented!!")
 
 class DummyPattern():
@@ -114,14 +115,21 @@ class fibsem:
         self.lamella_name=''
         self.alignment_img_buffer=None
         self.SAVparamsfile=''
-        self.testing=True
+        self.testing=False
         # Default alignment current
         self.alignment_current = float(1e-11)
         self.trench_offset = 4e-06
         # Variable for stopping operation
         self.continuerun = True
-        self.dummy_pattern=r"C:/Users/Sven/Desktop/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
-        self.probe_table=r'C:/Users/Sven/Desktop/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml'
+
+        #self.dummy_pattern=r"C:/Users/Sven/Desktop/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
+        #self.probe_table=r'C:/Users/Sven/Desktop/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml'
+        #self.APIpath=r'C:/Users/Sven/Pictures/test3.tif'
+        
+
+        self.dummy_pattern=r"D:/Images/RoSa/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
+        self.probe_table=r"D:/Images/RoSa/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml"
+        self.APIpath="C:/api/Grab.tif"
         self.connect()
     
     def __exit__(self):
@@ -212,7 +220,7 @@ class fibsem:
         #self.disconnect()
         #path=r'D:/Images/RoSa/Images/test.tif'
         #image_output=r'c:/Users/Sven/Pictures/test.tif'
-        path=r'C:/Users/Sven/Pictures/test3.tif'
+        path=self.APIpath
         #time.sleep(1)
         img=cv2.imread(path)
         #print(img)
@@ -459,6 +467,7 @@ class fibsem:
                 img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
                 microscope.beams.ion_beam.scanning.resolution.value=img_resolution
                 microscope.beams.ion_beam.beam_current.value=current
+                time.sleep(2)
                 beam_current_string=str(microscope.beams.ion_beam.beam_current.value)
 
 
@@ -466,7 +475,8 @@ class fibsem:
 
                 # Run auto contrast brightness and reset beam shift. Take an image as reference for alignment
                 microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
-                microscope.auto_functions.run_auto_cb()
+                #microscope.auto_functions.run_auto_cb()
+                self.auto_cb()
                 microscope.beams.ion_beam.beam_shift.value=Point(0,0)
                 current_img=self.take_image_IB()
 
@@ -608,11 +618,13 @@ class fibsem:
                 img_resolution = str(np.shape(image.data)[1]) + 'x' + str(np.shape(image.data)[0])
                 microscope.beams.ion_beam.scanning.resolution.value = img_resolution
                 microscope.beams.ion_beam.beam_current.value = current
+                time.sleep(2)
 
                 # Get HFW from Image
 
                 microscope.beams.ion_beam.horizontal_field_width.value = image.metadata.optics.scan_field_of_view.width
-                microscope.auto_functions.run_auto_cb()
+                #microscope.auto_functions.run_auto_cb()
+                self.auto_cb()
                 microscope.beams.ion_beam.beam_shift.value = Point(0, 0)
                 current_img = self.take_image_IB()
 
@@ -720,16 +732,22 @@ class fibsem:
 
         return()
 
+    def align_current_test(self,new_current):
+        print(new_current)
+        microscope.beams.ion_beam.beam_current.value = new_current
+        print(microscope.beams.ion_beam.beam_current.value)
     def align_current(self,new_current,beam='ION'):
         '''
         Input: Current to change towards, beam (currently "ION" only)
         Output: None
         Action: Take a reference image at the old current, change current and align to that reference image
         '''
+        from src.Zeiss.LocateFeature import locate_feature
         if beam=="ION":
-            microscope.imaging.set_active_view(2)
+            #microscope.imaging.set_active_view(2)
             #pos1=microscope.specimen.stage.current_position
-            microscope.auto_functions.run_auto_cb()
+            #microscope.auto_functions.run_auto_cb()
+            self.auto_cb()
             beam_current_string = str(microscope.beams.ion_beam.beam_current.value)
             ref_img=self.take_image_IB()
             now = datetime.datetime.now()
@@ -741,8 +759,9 @@ class fibsem:
             microscope.beams.ion_beam.beam_current.value = new_current
             microscope.beams.ion_beam.scanning.dwell_time.value=200e-09
             microscope.beams.ion_beam.scanning.resolution.value = '768x512'
-            microscope.auto_functions.run_auto_cb()
-            current_img=microscope.imaging.grab_frame()
+            #microscope.auto_functions.run_auto_cb()
+            self.auto_cb()
+            current_img=self.take_image_IB()
 
 
             move_count = 0
@@ -754,7 +773,7 @@ class fibsem:
                 pass
 
             favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
-            l = vision_toolkit.locate_feature(current_img, ref_img, favourite_matcher)
+            l = locate_feature(current_img, ref_img, favourite_matcher)
             
             print("Current confidence: " + str(l.confidence))
 
@@ -785,15 +804,15 @@ class fibsem:
                         self.log_output = self.log_output + "Saved Image as : " + self.output_dir + self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_")+ self.lamella_name + '_'+ beam_current_string + '_align_current_' + str(move_count)+'.tif'+'\n'
                     except:
                         pass
-                    l = vision_toolkit.locate_feature(current_img, ref_img, favourite_matcher)
+                    l = locate_feature(current_img, ref_img, favourite_matcher)
                     print("Current confidence: " + str(l.confidence))
                     self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
                 else:
                     print("Distance is greater than 10 microns. Abort.")
                     self.log_output = self.log_output + "Distance is greater than 10 microns. Abort.\n"
                     break
-            microscope.auto_functions.run_auto_cb()
-
+            #microscope.auto_functions.run_auto_cb()
+            self.auto_cb()
 
 
         return()
@@ -846,9 +865,18 @@ class fibsem:
 
     def test_pattern(self,fname=r'D:/Images/RoSa/SerialFIB/Bla/Bla/0_out/0_step_0_pattern_1.ptf'):
         print(fname)
+        print('CHANGING TO ION BEAM TO PREPARE PATTERNING')
+        microscope.beams.change_beam('ION')
+        #x=0
         microscope._patterning.load_pattern(fname,testing=self.testing)
+        while not microscope._patterning.is_idle:
+            time.sleep(0.3)
+            #print(x)
+            #time.sleep(1)
+        #
         #print(dir(microscope._patterning))
-
+        time.sleep(1)
+        microscope.beams.change_beam('ION')
         return()
 
     def pattern_parser(self,directory,filename):
@@ -986,7 +1014,8 @@ class fibsem:
         Output: None
         Action: runs auto contrast brightness
         '''
-        microscope.auto_functions.run_auto_cb()
+        #microscope.auto_functions.run_auto_cb()
+        print('Insert AutoCB function here')
         return()
 
 
@@ -1243,7 +1272,8 @@ class fibsem:
             except:
                 print("Directory " + label + " already exists")
 
-            pixel_size = alignment_image.metadata.binary_result.pixel_size[0]
+            #pixel_size = alignment_image.metadata.binary_result.pixel_size[0]
+            pixel_size = alignment_image.metadata.binary_result.pixel_size.x
             image_shape = np.shape(alignment_image.data)
 
 
@@ -1272,14 +1302,14 @@ class fibsem:
                         y = - (py - image_shape[0] / 2)
 
                         try:
-                            pattern = scope.create_pattern(x * pixel_size, y * pixel_size, w * pixel_size,
+                            pattern = self.create_pattern(x * pixel_size, y * pixel_size, w * pixel_size,
                                                            h * pixel_size)
-                            scope.save_pattern(lamella_dir, pattern_filename, pattern)
+                            self.save_pattern(lamella_dir, pattern_filename, pattern)
                         except:
                             print("Error in Pattern Writing: No Microscope connected?")
                             #pattern = Pattern(0, 0, 0, 0, 0, 'UP')
                             pattern=DummyPattern()
-                            scope.save_pattern(lamella_dir, pattern_filename, pattern)
+                            self.save_pattern(lamella_dir, pattern_filename, pattern)
                            
                 except KeyError:
                     print('No Patterns were found')
@@ -1698,25 +1728,32 @@ class fibsem:
         
 
         ### COMMENT OUT FOR TEST
-        self.align_test(ref_img, 'ION')
+        #self.align_test(ref_img, 'ION')
+        self.align(ref_img,'ION')
 
 
-        #for i in range(0, step_num):
-        #    if self.continuerun:
-        #        if float(steps_current[i]) == 0:
-        #            self.align_current(new_current=1e-11, beam='ION')
-        #        else:
-        #
-        #            self.align_current(new_current=float(steps_current[i]), beam='ION')
-
-        #        self.run_custom_milling(patterns_output_directory, step_pattern_names[i], int(steps_time[i]))
+        # for i in range(0, step_num):
+        #     if self.continuerun:
+        #         if float(steps_current[i]) == 0:
+        #             self.align_current(new_current=1e-11, beam='ION')
+        #         else:
+        
+        #             self.align_current(new_current=float(steps_current[i]), beam='ION')
+        #         self.run_custom_milling(patterns_output_directory, step_pattern_names[i], int(steps_time[i]))
         print(pattern_names)
         for j in range(0,len(step_pattern_names)):
+            #if self.continuerun:
+            if float(steps_current[j]) == 0:
+                    self.align_current(new_current=1e-11, beam='ION')
+            else:
+                new_current=float(steps_current[j])
+                self.align_current(new_current)
             pattern_names=step_pattern_names[j]
             for i in range(0,len(pattern_names)):
                 if self.continuerun:
                     print(pattern_names[i])
                     self.test_pattern(patterns_output_directory+'/'+pattern_names[i])
+                    #time.sleep(15)
 
 
         return (self.log_output)
@@ -1731,3 +1768,4 @@ class fibsem:
 #scope=fibsem()
 
 
+#scope.test_pattern()

@@ -1,0 +1,28 @@
+### Testing cryo-FIB protocol milling ### 
+
+### User Input ###
+output_dir=r'D:/Images/RoSa/Testing/Test2/'
+img_index=0
+stagepos_index=0
+pattern_index=0
+protocol=r'D:/Images/RoSa/GItHub/SerialFIB/testprotocol.pro'
+
+#############
+
+### Definition of variables ###
+
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index]['label']
+alignment_image=images[img_index]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index]
+
+#print(patterns)
+fibsem.write_patterns(label,patterns[pattern_index],alignment_image,output_dir)
+
+
+### Creating patternfile ###
+
+
+
+fibsem.run_milling_protocol(label,alignment_image,stagepos,pattern_dir,protocol)

@@ -328,7 +328,7 @@ class SEM_API:
                 self.__background_worker.pause()
                 time.sleep(0.1)
             # self.subs = []
-            # self.event = SEM_Handle(self.mic, self.subs)
+            # self.event = SEM_Handle(seflf.mic, self.subs)
             self.event_time = 0.1
             self.event = SEM_Handle(self.mic)
             self.__event_stop = False
@@ -714,6 +714,20 @@ class SEM_API:
         while self.GetState("DP_AUTO_FN_STATUS") == "Busy":
             time.sleep(0.1)
 
+    def set_active_beam(self, DP_Param):
+        c_dict = {
+            "ION": "CMD_FIB_MODE_FIB",
+            "ELECTRON": "CMD_FIB_MODE_SEM"
+        }
+        self.Execute(c_dict[str(DP_Param)])
+    
+    def freeze(self, DP_Param):
+        c_dict = {
+            "FREEZE": "CMD_FREEZE_ALL",
+            "UNFREEZE": "CMD_UNFREEZE_ALL"
+        }
+        self.Execute(c_dict[str(DP_Param)])
+
     def grab_full_image(self, fname, overlay=False, check=True):
         """
         grab the current full image by restarting the scan and till the complete
@@ -833,7 +847,7 @@ class SEM_API:
         self.event.close()
         del self.event
         # clear the MMF
-        if self.__state == 'local':
-            self.__pymap.close()
-            self.mic.Grab(0, 0, 0, 0, 0, "CZ.MMF")
+        # if self.__state == 'local':
+        #     self.__pymap.close()
+        #     self.mic.Grab(0, 0, 0, 0, 0, "CZ.MMF")
         self.mic.ClosingControl()
