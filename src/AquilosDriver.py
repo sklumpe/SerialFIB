@@ -84,6 +84,9 @@ class fibsem:
         self.trench_offset = 4e-06
         # Variable for stopping operation
         self.continuerun = True
+        
+        self.GIS=None
+        microscope.specimen.stage.set_default_coordinate_system('Raw')
 
     def define_output_dir(self,directory):
         '''
@@ -153,6 +156,85 @@ class fibsem:
             return(float(microscope.beams.ion_beam.beam_current.value))
         except:
             print("No microscope connected.")
+
+    def insert_GIS(self):
+        '''
+        Input: None
+        Output: None
+        Action: Insert GIS Needle. Initialize if needed.
+        '''
+        if self.GIS==None:
+            #port_list=microscope.gas.get_gis_port('Pt dep')
+            
+            #self.GIS=port_list['Pt dep']
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+        #microscope.
+        else:
+            print('GIS has been initialized previously.')
+        self.GIS.insert()
+        return()
+
+    def retract_GIS(self):
+        '''
+        Input: None
+        Output: None
+        Action: Retract GIS Needle. Initialize if needed.
+        '''
+        if self.GIS==None:
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+            #self.GIS=port_list['Pt dep']
+        #microscope.
+        else:
+            print('GIS has been initialized previously.')
+        self.GIS.retract()
+        return()
+    
+    def open_GIS(self,runtime):
+        #start_time=time.time()
+        #current_time=time.time()
+        #diff=current_time-start_time
+        #while diff<runtime:
+        #    print(diff)
+        #    diff=current_time-start_time
+        #    current_time=time.time()
+        if self.GIS==None:
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+        else:
+            print('GIS has been initialized previously.')
+        
+        
+        self.GIS.turn_heater_on()
+        time.sleep(10)
+        
+        
+        self.GIS.open()
+        x=time.time()
+        while True:
+            y=time.time()
+            if float(y)-float(x) < runtime:
+                time.sleep(0.5)  # sec
+                print(float(y)-float(x))
+            else:
+                self.GIS.close()
+                self.GIS.turn_heater_off()
+                print('Sample has been GISed for '+str(runtime)+' seconds.')
+                return()
+    def ion_on(self):
+        microscope.beams.ion_beam.turn_on()
+        return()
+    def electron_on(self):
+        microscope.beams.electron_beam.turn_on()
+        return()
+    
+    def setIonHFW(self,value=104):
+        microscope.beams.ion_beam.horizontal_field_width.value=value*1e-06
+        return()
+    def link_stage(self):
+        microscope.specimen.stage.link()
+        return()
+    def unlink_stage(self):
+        microscope.specimen.stage.unlink()
+        return()
     def take_image_IB(self):
         '''
         Input: None
