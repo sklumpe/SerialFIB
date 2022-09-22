@@ -1,0 +1,135 @@
+from src.read_SAV import read_SAV_params
+
+import datetime
+from autoscript_sdb_microscope_client import SdbMicroscopeClient
+microscope = SdbMicroscopeClient()
+microscope.connect()
+
+def run_SAVmod(self, lamella_name, alignment_image, IB_stagepos, EB_stagepos, pattern_ref_directory, paramsfile,EB_image='none'):
+
+        patterns_reference_directory = pattern_ref_directory  # +'/'#+str(lamella_name)+str('/')
+        patterns_output_directory = pattern_ref_directory[:-1] + '_out/'  # ''/'+str(lamella_name)+str('_out/')
+        self.define_SAVparams_file(paramsfile)
+        try:
+            os.mkdir(patterns_output_directory)
+        except:
+            self.log_output = self.log_output + "Pattern Directory already existed!!!" + '\n'
+        self.lamella_name = lamella_name
+
+        ref_img = alignment_image
+
+        step_pattern_list, steps_current = self.create_SAV_patterns(patterns_reference_directory,
+                                                                       str(lamella_name) + '_lamella.ptf',
+                                                                       str(lamella_name) + '_tp.ptf',
+                                                                       str(lamella_name) + '_bp.ptf')
+
+        # step_current=[]
+        step_num = 0
+        step_pattern_names = []
+        for step in step_pattern_list:
+            pattern_num = 0
+            pattern_names = []
+            for pattern in step:
+                pattern_name = lamella_name + str('_step_') + str(step_num) + str('_pattern_') + str(pattern_num) + str(
+                    '.ptf')
+                self.save_pattern(patterns_output_directory, pattern_name, pattern)
+                pattern_names.append(pattern_name)
+                pattern_num = pattern_num + 1
+            step_pattern_names.append(pattern_names)
+            step_num = step_num + 1
+
+        self.moveStageAbsolute(IB_stagepos)
+        ref_img.save(patterns_output_directory[:-1] + '/initial_fine_alignment_img.tif')
+
+        try:
+            os.mkdir(self.output_dir+self.lamella_name+'_out/'+'output/')
+        except:
+            print("Directory already exists!")
+
+
+        params=read_SAV_params(self.SAVparamsfile)
+        for i in range(0, step_num):
+            if self.continuerun:
+                if i==0:
+                    if int(params['AlignInitial'])==1:
+                        self.align(ref_img, 'ION')
+                        self.align_current(new_current=float(steps_current[i]), beam='ION')
+                if (i+1) % int(params['FocusEvery']) == 0:
+                    #microscope.imaging.set_active_view(1)
+                    self.auto_focus(beam="ELECTRON")
+                if i==0:
+                    if int(params['FocusInitial']) == 1:
+                    #microscope.imaging.set_active_view(1)
+                        self.auto_focus(beam="ELECTRON")
+                if (i+1) % int(params['RealignEvery']) == 0:
+                    self.align(ref_img,beam='ION',current=float(steps_current[i]))
+                    self.align_current(new_current=float(steps_current[i]), beam='ION')
+               
+
+
+                self.run_custom_milling(patterns_output_directory, step_pattern_names[i], int(params['MillingTime']))
+
+                self.moveStageAbsolute(EB_stagepos)
+                if (i + 1) % int(params['RealignSEMEvery']) == 0:
+                    if EB_image == 'none':
+                        continue
+                    else:
+                         self.align(EB_image,'ELECTRON')
+                         microscope.imaging.set_active_view(2)
+
+
+                current_images=self.take_image_EB_SAV()
+                if i==0:
+                    first_image=current_images[0]
+                now = datetime.datetime.now()
+                for j in range(len(current_images)):
+                    current_images[j].save(self.output_dir + self.lamella_name+'_out/output/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+str(i)+'_mode_'+str(j)+'.tif')
+
+                self.moveStageAbsolute(IB_stagepos)
+                microscope.imaging.set_active_view(2)
+
+        return (self.log_output)
+
+fibsem.run_SAVmod=run_SAVmod
+
+#fibsem.run_SAVmod()
+
+
+### Testing cryo-FIB-SEM volume imaging ### 
+
+### User Input ###
+output_dir=r'D:/SharedData/Sven/Dev/RFI7'
+img_index=0
+EB_image_index=1
+stagepos_index=0
+stagepos_index_EB=1
+pattern_index=0
+fibsem.SAVparamsfile=r'D:/SharedData/Sven/Dev/SAVparams2.spf'
+
+#############
+
+
+### Definition of variables ###
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index]['label']
+alignment_image=images[img_index]
+EB_image=images[EB_image_index]
+pattern_dir=output_dir+'/'+str(label)+'/'
+
+import os
+try:
+    os.mkdir(output_dir)
+    os.mkdir(output_dir+'/'+str(label)+'_out/')
+except:
+   print('Directory already existis')
+
+### Writting pattern directories ###
+fibsem.write_patterns(label,patterns[pattern_index],alignment_image,output_dir)
+
+
+### Creating SAV patternfile ###
+
+fibsem.create_SAV_patterns(pattern_dir,str(label)+'_lamella.ptf',str(label)+'_tp.ptf',str(label)+'_bp.ptf')
+
+### Running SAV ###
+run_SAVmod(fibsem,label, alignment_image, stagepositions[stagepos_index], stagepositions[stagepos_index_EB], pattern_dir,fibsem.SAVparamsfile,EB_image=EB_image)

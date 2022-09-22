@@ -132,7 +132,10 @@ class Ui_MainWindow(object):
         import os
         path = r'%s' % os.getcwd().replace('\\', '/')
         self.output_dir=path
-        scope.define_output_dir(self.output_dir)
+        try:
+            scope.define_output_dir(self.output_dir)
+        except:
+            print("No Microscope connected")
         self.SAVparamsfile=r'./SAVparams.spf'
         self.roughmillprotocol=r'./roughmill.pro'
         self.finemillprotocol=r'./finemill.pro'

@@ -86,7 +86,10 @@ class fibsem:
         self.continuerun = True
         
         self.GIS=None
-        microscope.specimen.stage.set_default_coordinate_system('Raw')
+        try:
+            microscope.specimen.stage.set_default_coordinate_system('Raw')
+        except:
+            print('no microscope connected')
 
     def define_output_dir(self,directory):
         '''
@@ -1721,6 +1724,6 @@ class fibsem:
 ####
 
 
-scope=fibsem()
+#scope=fibsem()
 
 
