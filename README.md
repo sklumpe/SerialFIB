@@ -81,6 +81,8 @@ All adjustable parameters can be viewed by the -h flag.
 ### License ###
 
 Original Release: Copyright (C) 2021 Sven Klumpe EMBL/Herman Fung EMBL/Sara Goetz Jürgen Plitzko EMBL/Julia Mahamid
+
+
 Zeiss Implementation: Copyright (C) 2022 Sven Klumpe Zeiss/Roland Salzer
 
 	This program is free software: you can redistribute it and/or modify
