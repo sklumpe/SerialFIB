@@ -80,7 +80,8 @@ All adjustable parameters can be viewed by the -h flag.
 
 ### License ###
 
-Copyright (C) 2021 Sven Klumpe EMBL/Herman Fung EMBL/Sara Goetz Jürgen Plitzko EMBL/Julia Mahamid
+Original Release: Copyright (C) 2021 Sven Klumpe EMBL/Herman Fung EMBL/Sara Goetz Jürgen Plitzko EMBL/Julia Mahamid
+Zeiss Implementation: Copyright (C) 2022 Sven Klumpe Zeiss/Roland Salzer
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -105,7 +106,7 @@ Version 1.0 is the first public release.
 
 We ask users to cite:
 
-* The general [paper](http://www.biorxiv.org/content/10.1101/2021.05.19.444745v1) on the automation software currently on bioRxiv.
+* The general [paper](https://elifesciences.org/articles/70506) on the automation software published at eLife.
 * The [paper](http://dx.doi.org/10.1016/j.bpj.2015.10.053) that forms the basis of the 3D Correlation Toolbox
 
 
