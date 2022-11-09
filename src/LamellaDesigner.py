@@ -271,6 +271,10 @@ class Ui_LamellaDesigner(object):
         new_step=Step(step_name=new_step_name,IB_Current=IB_Current)
         self.step_dict.update({new_step_name:new_step})
         self.step_list.append(new_step)
+        #self.listWidget_Steps.setSelection(self.listWidget_Steps.item(len(self.listWidget_Steps.items())))
+        #self.listWidget_Steps.setItemSelected(self.listWidget_Steps.item(0))
+        #items=self.listWidget_Steps.items()
+        self.listWidget_Steps.setCurrentItem(item)
         return()
     
     def RemoveStep(self):
