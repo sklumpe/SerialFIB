@@ -728,7 +728,7 @@ class SEM_API:
         }
         self.Execute(c_dict[str(DP_Param)])
 
-    def grab_full_image(self, fname, overlay=False, check=True):
+    def grab_full_image(self, fname, overlay=False, check=False):
         """
         grab the current full image by restarting the scan and till the complete
         frame is finished, and then save the image.

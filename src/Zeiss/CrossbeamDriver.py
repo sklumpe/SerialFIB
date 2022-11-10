@@ -127,8 +127,8 @@ class fibsem:
         #self.APIpath=r'C:/Users/Sven/Pictures/test3.tif'
         
 
-        self.dummy_pattern=r"D:/Images/RoSa/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
-        self.probe_table=r"D:/Images/RoSa/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml"
+        self.dummy_pattern=r"D:/UserData/RoSa/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
+        self.probe_table=r"D:/UserData/RoSa/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml"
         self.APIpath="C:/api/Grab.tif"
         self.connect()
     
@@ -757,6 +757,7 @@ class fibsem:
             except:
                 print("Run in Scripting Mode")
             microscope.beams.ion_beam.beam_current.value = new_current
+            time.sleep(5)
             microscope.beams.ion_beam.scanning.dwell_time.value=200e-09
             microscope.beams.ion_beam.scanning.resolution.value = '768x512'
             #microscope.auto_functions.run_auto_cb()
@@ -939,7 +940,7 @@ class fibsem:
                 rectangle_list.update({filename[:-4]:rectangle})
         return(rectangle_list)
 
-    def save_pattern(self,directory,filename,pattern,current=1e-011):
+    def save_pattern(self,directory,filename,pattern,current=1e-011, time=10):
         '''
         Input: Directory path as string, output filename as string, Pattern as AutoScript4 Pattern object
         Output: None
@@ -981,27 +982,58 @@ class fibsem:
         dummy_pattern=self.dummy_pattern
         tree = ET.parse(dummy_pattern)
         root = tree.getroot()
+        #mill_time-time
 
         from src.Zeiss.read_probe_table import getProbe
         params=getProbe(current,self.probe_table)
+
+        from src.Zeiss.caculate_mill_time_fct import calculate_dwell_time
+        
         #print("THE CURRENT IS",current)
         for i in root.iter('RECT'):
             i.attrib['x']=str(pattern.x*1e06)
             i.attrib['y']=str(pattern.y*1e06)
             i.attrib['height']=str(pattern.height*1e06)
             i.attrib['width']=str(pattern.width*1e06)
+            height=pattern.height
+            width=pattern.width
 
             for j in i.iter('PROBE'):
                 j.attrib['name']=params['name']
                 j.attrib['current']=params['current'] + " A"
-
-                
                 j.attrib['diameter']=params['diameter']+" m"
-                #j.attrib['name']="30kV:50pA ref"
-                #j.attrib['current']="5e-011 A"
-                #j.attrib['diameter']="4.5e-008 m"
+            for k in i.iter('EXPOSURE'):
+                pixel_spacing=float(int(k.attrib['pixel_spacing_area'].split(' ')[0])/100)
+                track_spacing=float(int(k.attrib['track_spacing'].split(' ')[0])/100)
+                dose=float(k.attrib['dose_area'].split(' ')[0])
+
+                cycle=6125
+                probe_current=float(params['current'])
+                probe_size=float(params['diameter'])
+                
+
+            #mill_time=calculate_mill_time(params['current'],params['diameter'],params['pixel_spacing_area'],params['track_spacing'],params['dose_area'],cycle=params['']
+           
+                dose=calculate_dwell_time(probe_current,probe_size,pixel_spacing,track_spacing,dose,cycle,time,width,height)
+                k.attrib['dose_area']=str(np.absolute(dose))+str(" C/m²")
+                print(str(dose)+str(" C/m&#178;"))
+
+            #j.attrib['name']="30kV:50pA ref"
+            #j.attrib['current']="5e-011 A"
+            #j.attrib['diameter']="4.5e-008 m"
+                #print(dwell_time)
+                #k.attrib['dwell_times_area']=str(dwell_time)+" s"
 
         #try:
+        #print("Probe_current is:",probe_current)
+        #print("Track_Spacing is:",track_spacing)
+        #print("Pixel spacing is:",pixel_spacing)
+        #print("Dose is:",dose)
+        #print("Cycle:",cycle)
+        #print("Time is:",time)
+        #print("Width is:",width)
+        #print("height: ", height)
+        #print(probe_current,probe_size,pixel_spacing,track_spacing,dose,cycle,time,width,height)
         tree.write(directory+filename)
         #except:
         #    print("Files already exist! Please check InputDir")
@@ -1392,7 +1424,7 @@ class fibsem:
 
                 pattern_name = lamella_name + str('_step_') + str(step_num)+str('_pattern_')+str(pattern_num)+str('.ptf')
                 ### TEST
-                self.save_pattern(patterns_output_directory,pattern_name,pattern,current=steps_current[step_num])
+                self.save_pattern(patterns_output_directory,pattern_name,pattern,current=steps_current[step_num],time=steps_time[step_num])
                 ###
                 pattern_names.append(pattern_name)
                 pattern_num=pattern_num+1
@@ -1715,7 +1747,8 @@ class fibsem:
                     '.ptf')
                 #current needs to go here
                 current=steps_current[step_num]
-                self.save_pattern(patterns_output_directory, pattern_name, pattern,current)
+                time=float(steps_time[step_num])
+                self.save_pattern(patterns_output_directory, pattern_name, pattern,current,time)
                 pattern_names.append(pattern_name)
                 pattern_num = pattern_num + 1
 

@@ -353,7 +353,7 @@ class Patterning():
         pass
 
     def load_pattern(self, fname,testing=False):
-        shutil.copyfile(fname, r"C:/ProgramData/Carl Zeiss/SmartFIB/API/Drop/ApiLayout.ely")
+        shutil.copyfile(fname, "C:/ProgramData/Carl Zeiss/SmartFIB/API/Drop/ApiLayout.ely")
         self._sem.Execute("CMD_SMARTFIB_LOAD_ELY")    #r"C:\ProgramData\Carl Zeiss\SmartFIB\API\Drop\ApiLayout.ely"
         time.sleep(1)
         self._sem.Execute("CMD_SMARTFIB_PREPARE_EXPOSURE")
@@ -492,8 +492,9 @@ class AutoFunctions():
         self._sem = sem
 
     def run_auto_cb(self):
-        self._sem.Execute("CMD_ABC")
+        self._sem.Execute("CMD_QUICK_BC")
         time.sleep(0.5)
+        self._sem.Execute("CMD_QUICK_BC")
         while self._sem.GetState("DP_AUTO_FUNCTION") != "Idle":
             time.sleep(0.5) # use this when working with PyQt5
 

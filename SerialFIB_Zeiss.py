@@ -575,7 +575,7 @@ class Ui_MainWindow(object):
         self.actionTestbutton1.setText(_translate("MainWindow", "Draw Corr Pattern"))
         self.actionTestbutton2.setText(_translate("MainWindow", "Align to Image Buffer"))
         self.actionTestbutton3.setText(_translate("MainWindow", "Change Alignment Current"))
-        self.actionTestbutton4.setText(_translate("MainWindow", "Testbutton4"))
+        self.actionTestbutton4.setText(_translate("MainWindow", "Test Write Patterns"))
         self.actionTestbutton5.setText(_translate("MainWindow", "Testbutton5"))
         self.actionSaveSettings.setText(_translate("MainWindow", "SaveSettings"))
         self.actionLoadSettings.setText(_translate("MainWindow", "LoadSettings"))
