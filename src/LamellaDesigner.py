@@ -275,6 +275,13 @@ class Ui_LamellaDesigner(object):
         #self.listWidget_Steps.setItemSelected(self.listWidget_Steps.item(0))
         #items=self.listWidget_Steps.items()
         self.listWidget_Steps.setCurrentItem(item)
+        #self.ChangeStep()
+        self.showInStepView()
+        
+        self.ChangeStep()
+        #self.showInPatternView()
+        self.previous_step_name=new_step_name
+
         return()
     
     def RemoveStep(self):
