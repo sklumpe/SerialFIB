@@ -301,6 +301,13 @@ class Ui_PatternFileEditor(object):
             new_step=Step(step_name=new_step_name,IB_Current=IB_Current)
             self.step_dict.update({new_step_name:new_step})
             self.step_list.append(new_step)
+
+            self.listWidget_Steps.setCurrentItem(item)
+            #self.ChangeStep()
+            self.showInStepView()
+            self.ChangeStep()
+            #self.showInPatternView()
+            self.previous_step_name=new_step_name
         except:
             print("Something went wrong, please let us know!")
             print(sys.exc_info())
@@ -365,7 +372,11 @@ class Ui_PatternFileEditor(object):
                 
             self.step_dict.update({step_text:old_list})
 
-
+            self.listWidget_Patterns.setCurrentItem(item)
+            #self.ChangeStep()
+            #self.showInStepView()
+            #self.ChangeStep()
+            self.showInPatternView()
         except:
             print("No Step selected")
         return()
