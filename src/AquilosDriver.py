@@ -29,17 +29,21 @@
 
 
 #### IMPORT MICROSCOPE
-from autoscript_sdb_microscope_client import SdbMicroscopeClient
-from autoscript_sdb_microscope_client.enumerations import *
-from autoscript_sdb_microscope_client.structures import *
-# Set Up Microscope
-microscope = SdbMicroscopeClient()
+try:
+    from autoscript_sdb_microscope_client import SdbMicroscopeClient
+    from autoscript_sdb_microscope_client.enumerations import *
+    from autoscript_sdb_microscope_client.structures import *
+    # Set Up Microscope
+    microscope = SdbMicroscopeClient()
 
 
-from autoscript_toolkit.template_matchers import *
-import autoscript_toolkit.vision as vision_toolkit
+    from autoscript_toolkit.template_matchers import * 
+    import autoscript_toolkit.vision as vision_toolkit
+    from src.custom_matchers_v3 import *
+except:
+    print("No Autoscript installed")
 
-from src.custom_matchers_v2 import *
+
 from src.read_SAV import read_SAV_params
 import cv2
 import numpy as np
@@ -80,6 +84,12 @@ class fibsem:
         self.trench_offset = 4e-06
         # Variable for stopping operation
         self.continuerun = True
+        
+        self.GIS=None
+        try:
+            microscope.specimen.stage.set_default_coordinate_system('Raw')
+        except:
+            print('no microscope connected')
 
     def define_output_dir(self,directory):
         '''
@@ -149,6 +159,85 @@ class fibsem:
             return(float(microscope.beams.ion_beam.beam_current.value))
         except:
             print("No microscope connected.")
+
+    def insert_GIS(self):
+        '''
+        Input: None
+        Output: None
+        Action: Insert GIS Needle. Initialize if needed.
+        '''
+        if self.GIS==None:
+            #port_list=microscope.gas.get_gis_port('Pt dep')
+            
+            #self.GIS=port_list['Pt dep']
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+        #microscope.
+        else:
+            print('GIS has been initialized previously.')
+        self.GIS.insert()
+        return()
+
+    def retract_GIS(self):
+        '''
+        Input: None
+        Output: None
+        Action: Retract GIS Needle. Initialize if needed.
+        '''
+        if self.GIS==None:
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+            #self.GIS=port_list['Pt dep']
+        #microscope.
+        else:
+            print('GIS has been initialized previously.')
+        self.GIS.retract()
+        return()
+    
+    def open_GIS(self,runtime):
+        #start_time=time.time()
+        #current_time=time.time()
+        #diff=current_time-start_time
+        #while diff<runtime:
+        #    print(diff)
+        #    diff=current_time-start_time
+        #    current_time=time.time()
+        if self.GIS==None:
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+        else:
+            print('GIS has been initialized previously.')
+        
+        
+        self.GIS.turn_heater_on()
+        time.sleep(10)
+        
+        
+        self.GIS.open()
+        x=time.time()
+        while True:
+            y=time.time()
+            if float(y)-float(x) < runtime:
+                time.sleep(0.5)  # sec
+                print(float(y)-float(x))
+            else:
+                self.GIS.close()
+                self.GIS.turn_heater_off()
+                print('Sample has been GISed for '+str(runtime)+' seconds.')
+                return()
+    def ion_on(self):
+        microscope.beams.ion_beam.turn_on()
+        return()
+    def electron_on(self):
+        microscope.beams.electron_beam.turn_on()
+        return()
+    
+    def setIonHFW(self,value=104):
+        microscope.beams.ion_beam.horizontal_field_width.value=value*1e-06
+        return()
+    def link_stage(self):
+        microscope.specimen.stage.link()
+        return()
+    def unlink_stage(self):
+        microscope.specimen.stage.unlink()
+        return()
     def take_image_IB(self):
         '''
         Input: None
@@ -306,6 +395,11 @@ class fibsem:
         stagepos=StagePosition(x=x,y=y,z=z,t=t,r=r)
         microscope.specimen.stage.relative_move(stagepos)
         return("Stage Moved")
+    def print_stage_rot(self):
+        print(microscope.beams.ion_beam.scanning.rotation.value)
+        return None
+
+
     def align(self,image,beam,current=1.0e-11):
         '''
         Input: Alignment image, Beam ("ION" or "ELECTRON"), optionally current but replaced by the GUI option
@@ -335,13 +429,15 @@ class fibsem:
 
                 # Run auto contrast brightness and reset beam shift. Take an image as reference for alignment
                 microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
+                #microscope.beams.ion_beam.horizontal_field_width.value =
                 microscope.auto_functions.run_auto_cb()
                 microscope.beams.ion_beam.beam_shift.value=Point(0,0)
                 current_img=self.take_image_IB()
 
 
                 # Load Matcher function and locate feature
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                #favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                favourite_matcher = CustomCVMatcher('phase')
                 l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
                 print("Current confidence: " + str(l.confidence))
                 self.log_output=self.log_output+"Step Clarification: Initial Alignment after Stage move \n"
@@ -372,11 +468,19 @@ class fibsem:
                         # move stage and reset beam shift
                         print("Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift...")
                         self.log_output = self.log_output + "Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift... \n"
-                        rotation=microscope.beams.electron_beam.scanning.rotation.value
+                        rotation=microscope.beams.ion_beam.scanning.rotation.value
+                        print(rotation)
                         possible_rotations=[0,3.14]
                         #print(min(possible_rotations, key=lambda x: abs(x - rotation)))
 
-                        pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        if rotation==0:
+
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
+
+                            print('Rotation is zero')
+                        else:
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                            print('Rotation is NOT zero')
                         microscope.specimen.stage.relative_move(pos_corr)
                         microscope.beams.ion_beam.beam_shift.value = Point(0,0)
 
@@ -445,8 +549,9 @@ class fibsem:
                         print(num)
                         if num==0:
                             pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
-                        if num==3.14:
+                        else:
                             pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
                         microscope.specimen.stage.relative_move(pos_corr)
                         microscope.beams.electron_beam.beam_shift.value = Point(0,0)
 
@@ -484,7 +589,8 @@ class fibsem:
                 current_img = self.take_image_IB()
 
 
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                #favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                favourite_matcher = CustomCVMatcher('phase')
                 l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
                 print("Current confidence: " + str(l.confidence))
 
@@ -508,7 +614,18 @@ class fibsem:
                         print("Moving stage by (" + str(x) + "," + str(y) + ") and resetting beam shift...")
                         self.log_output = self.log_output + "Moving stage by (" + str(x) + "," + str(
                             y) + ") and resetting beam shift... \n"
-                        pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+
+                        rotation = microscope.beams.ion_beam.scanning.rotation.value
+                        print(rotation)
+                        possible_rotations = [0, 3.14]
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        if rotation==0:
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
+                            print('Rotation is zero')
+                        else:
+                            pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                            print('Rotation is NOT zero')
                         microscope.specimen.stage.relative_move(pos_corr)
                         microscope.beams.ion_beam.beam_shift.value = Point(0, 0)
 
@@ -1265,7 +1382,7 @@ class fibsem:
 
         self.moveStageAbsolute(stagepos)
         ref_img.save(patterns_output_directory[:-1] + '/initial_fine_alignment_img.tif')
-        #self.align(ref_img,'ION')
+        self.align(ref_img,'ION')
 
         for i in range(0,step_num):
             if self.continuerun:
@@ -1607,6 +1724,6 @@ class fibsem:
 ####
 
 
-scope=fibsem()
+#scope=fibsem()
 
 

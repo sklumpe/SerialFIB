@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+        <ASP version="2.1" type="1">
+            <GEOMETRY angle="0 deg" thickness="0" width="34.7093" depth="9.37543" opening_angle="10" perspective_angle_fib="40" perspective_angle_sem="54"/>
+            <DEPOSITION show="true" thickness="0.625028" margin_width="1.25006" margin_height="1.25006">
+          <PROBE name="unchanged" type="unchanged" current="5e-011 A" diameter="1e-008 m"/>
+          <EXPOSURE version="2.1" file="C:\Program Files (x86)\Carl Zeiss\SmartFIB\config\DefaultsArea.epm">
+          </EXPOSURE>
+        </DEPOSITION>
+        <MILLING show="true" automatic_proximity_overlap="true" polishing_tilt="1" fastmill="false" fastmill_f1="0.7" fastmill_f2="0.5" fastmill_f3="3" fastmill_f4="0.9" fastmill_f5="0.5" fastmill_f6="0.3" fastmill_f7="1">
+          <EXPOSURE version="2.1" file="C:\Program Files (x86)\Carl Zeiss\SmartFIB\config\DefaultsArea.epm">
+          </EXPOSURE>
+          <MILLING_STEP show="true" proximity="0.0125" overlap="0" dc_interval="180" loops="1">
+          <PROBE name="unchanged" type="unchanged" current="5e-011 A" diameter="1e-008 m"/>
+          </MILLING_STEP>
+          <MILLING_STEP show="true" proximity="0.0125" overlap="0.005" dc_interval="180" loops="1">
+          <PROBE name="unchanged" type="unchanged" current="5e-011 A" diameter="1e-008 m"/>
+          </MILLING_STEP>
+          <MILLING_STEP show="true" proximity="0.0025" overlap="0.168624" dc_interval="180" loops="1">
+          <PROBE name="unchanged" type="unchanged" current="5e-011 A" diameter="1e-008 m"/>
+          </MILLING_STEP>
+        </MILLING>
+        <CUTOUT show="true" width="0.625028" link_size="1.25006" side_margin="2.50011" bottom_margin="2.50011" milling_factor="1" link_position="right">
+          <PROBE name="30kV:50pA" type="specific" current="5e-011 A" diameter="1e-008 m"/>
+          </CUTOUT>
+        </ASP>

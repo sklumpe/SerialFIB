@@ -239,7 +239,13 @@ class Ui_LamellaDesigner(object):
         self.Value_Pattern.setMinimum(-100)
         self.Value_Lamella.setMinimum(-100)
 
-        self.Value_Time.setMaximum(1000)
+        self.Value_WidthRed.setMaximum(1000)
+        # self.Value_Height.setMinimum(-100)
+        self.Value_Pattern.setMaximum(1000)
+        self.Value_Lamella.setMaximum(1000)
+
+
+        self.Value_Time.setMaximum(100000)
 
 
         self.step_list=[]
@@ -265,6 +271,17 @@ class Ui_LamellaDesigner(object):
         new_step=Step(step_name=new_step_name,IB_Current=IB_Current)
         self.step_dict.update({new_step_name:new_step})
         self.step_list.append(new_step)
+        #self.listWidget_Steps.setSelection(self.listWidget_Steps.item(len(self.listWidget_Steps.items())))
+        #self.listWidget_Steps.setItemSelected(self.listWidget_Steps.item(0))
+        #items=self.listWidget_Steps.items()
+        self.listWidget_Steps.setCurrentItem(item)
+        #self.ChangeStep()
+        self.showInStepView()
+        
+        self.ChangeStep()
+        #self.showInPatternView()
+        self.previous_step_name=new_step_name
+
         return()
     
     def RemoveStep(self):
@@ -686,6 +703,43 @@ class Ui_LamellaDesigner(object):
 
             self.step_dict=step_dict
             self.step_list=step_list
+
+
+            #patterns=pattern_dict[0]
+            #print(parameter_list[0])
+            pattern=parameter_list[0]
+            #print(pattern)
+
+            print(step_list[0])
+            #print(pattern['value_pattern'])
+            #patterns=pattern_list
+            #print(patterns[1])
+            #print(self.step_list[0])
+            #self.listWidget_Steps.setSelection(self.listWidget_Steps.item(0))
+            self.listWidget_Steps.setCurrentRow(0)
+            self.showInStepView()
+            self.listWidget_Patterns.setCurrentRow(0)
+            #print(float(patterns[1]['Height_y']))
+            #self.Value_Height.setValue(float(patterns[0].height)*1e06)
+            self.showInPatternView()
+
+            #print(float(pattern['thickness_patterns'])*1e06)
+            self.Value_Pattern.setValue(float(pattern['thickness_patterns'])*1e06)
+            self.Value_Lamella.setValue(float(pattern['thickness_lamella'])*1e06)
+            self.Value_Time.setValue(float(pattern['time']))
+            self.PatternTypeBox.setCurrentText(str(pattern['pattern_type']))
+            self.PatternDirectionBox.setCurrentText(str(pattern['side']))
+            
+            #self.Value_Time.setValue(pattern.time)
+            self.showInStepView()
+            self.showInPatternView()
+
+
+            #self.Value_Width.setValue(float(patterns[0]['Width_x'])*1e06)
+            #self.Value_OffsetX.setValue(float(patterns[0]['Offset_x'])*1e06)
+            #self.Value_OffsetY.setValue(float(patterns[0]['Offset_y'])*1e06)
+            
+            
         except:
             print("No patternfile selected or file seems to be corrupt.")
             print(sys.exc_info())

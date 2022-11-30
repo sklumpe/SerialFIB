@@ -1,0 +1,15 @@
+# SerialFIB log
+SFIB.log
+
+#Cache
+src/__pycache__
+tmp.py
+pickle.tmp
+#Documentation in construction
+documentation/
+src/Zeiss/__pycache__
+src/Zeiss/ExampleFiles
+src/Zeiss/OldFiles
+src/Zeiss/Workfiles
+src/Zeiss/.ipynb_checkpoints
+
