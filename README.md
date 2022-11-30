@@ -80,9 +80,12 @@ All adjustable parameters can be viewed by the -h flag.
 
 ### License ###
 
-Initial Release
 
-Copyright (C) 2021 Sven Klumpe EMBL/Herman Fung EMBL/Sara Goetz Jürgen Plitzko EMBL/Julia Mahamid
+Original Release: Copyright (C) 2021 Sven Klumpe EMBL/Herman Fung EMBL/Sara Goetz Jürgen Plitzko EMBL/Julia Mahamid
+
+
+Zeiss Implementation: Copyright (C) 2022 Sven Klumpe Zeiss/Roland Salzer
+
 
 Added Modules
 
@@ -112,7 +115,9 @@ Version 1.0 is the first public release.
 
 We ask users to cite:
 
-* The general [paper](https://doi.org/10.7554/eLife.70506) on the automation software (previous [biorxiv](http://www.biorxiv.org/content/10.1101/2021.05.19.444745v1)) .
+
+* The general [paper](https://elifesciences.org/articles/70506) on the automation software published at eLife.
+
 * The [paper](http://dx.doi.org/10.1016/j.bpj.2015.10.053) that forms the basis of the 3D Correlation Toolbox
 
 
