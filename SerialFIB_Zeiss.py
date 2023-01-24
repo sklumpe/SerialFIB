@@ -1937,8 +1937,12 @@ class Ui_MainWindow(object):
 
 
         patterns.sort(key=y_pos)
+        num=0
         for i in patterns:
-            print("Pattern Number "+str(patterns.index(i))+str(" is ")+str(i.w*pixel_size[0]*1000000)+" µm wide.")
+            
+            print("Pattern Number "+str(num)+str(" is ")+str(i.w*pixel_size.x*1000000)+" µm wide.")
+            num=num+1
+            #print(i)
 
     def save_session(self):
         try:
@@ -2666,8 +2670,14 @@ class LamellaView(QtWidgets.QGraphicsView):
                     #if i==item_id:
 
             patterns.sort(key=y_pos)
+            num=0
             for i in patterns:
-                print("Pattern Number "+str(patterns.index(i))+str(" is ")+str(i.w*pixel_size[0]*1000000)+" µm wide.")
+                
+                print("Pattern Number "+str(num)+str(" is ")+str(i.w*pixel_size.x*1000000)+" µm wide.")
+                num=num+1
+                #print(i)
+            #for i in patterns:
+            #    print("Pattern Number "+str(patterns.index(i))+str(" is ")+str(i.w*pixel_size[0]*1000000)+" µm wide.")
         
     def paintpoint(self,x,y):
         #Painting Correlation Spots

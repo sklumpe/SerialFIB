@@ -31,6 +31,36 @@ import math
 #global probe_table_path
 
 #image_output=r'C:/Users/Sven/Pictures/test.tif'
+
+
+
+SI_METERS = [   (1/1000000000000,"fm"),
+                (1/1000000000,"pm"),
+                (1/1000000000,   "nm"),
+                (1/1000000,      "µm"),
+                (1/1000,         "mm"),
+                (1/100,          "cm"),
+                (1,          "m")]
+
+
+SI_VOLTS = [   (1/1000000000000,"fV"),
+                (1/1000000000,"pV"),
+                (1/1000000000,   "nV"),
+                (1/1000000,      "µV"),
+                (1/1000,         "mV"),
+                (1/100,          "cV"),
+                (1,          "V"),
+               (1000,          "kV")]
+
+SI_AMPERES = [   (1/1000000000000,"fA"),
+                (1e-12,"pA"),
+                (1e-09,   "nA"),
+                (1e-06,      "µA"),
+                (1e-03,         "mA"),
+                (1e-02,          "cA"),
+                (1,          "A"),
+                (1e03,          "kA")]
+
 class Point:
     def __init__(self, x_init, y_init):
         self.x = x_init
@@ -213,11 +243,45 @@ class IonBeam():
         #self._beam_current.value = 500e-9
         self._beam_current.source = "Ion"
 
+        self._sem=sem
+
     def turn_on(self):
         pass
 
     def turn_off(self):
         pass
+
+    
+    def convert(self, meter_unit, units):
+        """meter_units value gviven in string with included units. 
+            units: iss the dictionary with unit systemn and strings"""
+        useFactor,useName = units[0]
+        for factor,name in units:
+            if name in meter_unit:
+                useFactor = factor
+                useName = name
+                value = float(meter_unit[:meter_unit.find(name)])
+                break
+        print(f"Converting {name} multplying {useFactor} and {value}")
+        return (value*useFactor,useName)
+
+    def get_current(self):
+        print('I was here')
+        #current=self._sem.GetState("DP_FIB_PROBE")
+        string=self._sem.GetState("DP_FIB_IMAGE_PROBE")
+        current=string.split(':')[1]
+        print(current)
+        
+        #nA=1e-09
+        #pA=1e-12
+        #print(self.convert(current,SI_AMPERES,'nA'))
+        #print(self.convert(current,SI_AMPERES))
+        current=self.convert(current,SI_AMPERES)[0]
+
+        print(current)
+        #self._sem.GetValue("DP_FIB_MODE")
+        return(current)
+        #return(current)
 
     @property
     def beam_shift(self) -> BeamShift:
@@ -242,6 +306,7 @@ class IonBeam():
     @is_blanked.setter
     def is_blanked(self, is_blanked) -> None:
         self._is_blanked = is_blanked
+
 
 
 # TODO:
@@ -424,7 +489,14 @@ class Imaging():
     def grab_frame(self, framesettings: GrabFrameSettings):
         """Grabbing a single full frame image"""
         #image = self._sem.grab_full_image(r"D:/Images/RoSa/Images/test.tif")
+        print(framesettings._resolution)
+        string1=framesettings._resolution.split('x')
+        print(string1)
+        resolution=string1[0]+' * '+string1[1]
+        print(resolution)
+        self._sem.SetState('DP_IMAGE_STORE',resolution)
         image = self._sem.grab_full_image(self.image_output)
+
         return image
 
     def grab_multiple_frames(self, framesettings: GrabFrameSettings):
@@ -434,6 +506,12 @@ class Imaging():
         images.append(self._sem.grab_full_image(self.image_output))
         return images
 
+    def set_contrast(self,value):
+        self._sem.SetValue("AP_CONTRAST", value)
+        return
+    def set_brightness(self,value):
+        self._sem.SetValue("AP_BRIGHTNESS", value)
+        return
 
 # TODO: 2
 class Stage():
@@ -497,7 +575,6 @@ class AutoFunctions():
         self._sem.Execute("CMD_QUICK_BC")
         while self._sem.GetState("DP_AUTO_FUNCTION") != "Idle":
             time.sleep(0.5) # use this when working with PyQt5
-
     def run_auto_focus(self):
         self._sem.Execute("CMD_AUTO_FOCUS_FINE")
         while self._sem.GetState("DP_AUTO_FUNCTION") != "Idle": time.sleep(0.5) # use this when working with PyQt5

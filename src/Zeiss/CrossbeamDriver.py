@@ -201,12 +201,14 @@ class fibsem:
         Output: Returns the current ion beam current as float
         Action: None
         '''
+        current=microscope.beams.ion_beam.get_current()
+        #print('Hello')
         #try:
         #    return(float(microscope.beams.ion_beam.beam_current.value))
         #except:
         #    print("No microscope connected.")
-        return()
-    def take_image_IB(self):
+        return(current)
+    def take_image_IB(self,settings=None):
         '''
         Input: None
         Output: AdornedImage
@@ -215,7 +217,13 @@ class fibsem:
         
         #return(img)
         #self.connect()
-        settings=GrabFrameSettings(dwell_time=10e-08,resolution='1024x768',line_integration=1)
+        if settings==None:
+            settings=GrabFrameSettings(dwell_time=10e-08,resolution='1024x768',line_integration=1)
+        else:
+            print("Other imaging settings than standard given")
+        time.sleep(1)
+        microscope.beams.change_beam('ION')
+        time.sleep(1)
         microscope.imaging.grab_frame(settings)
         #self.disconnect()
         #path=r'D:/Images/RoSa/Images/test.tif'
@@ -747,7 +755,7 @@ class fibsem:
             #microscope.imaging.set_active_view(2)
             #pos1=microscope.specimen.stage.current_position
             #microscope.auto_functions.run_auto_cb()
-            self.auto_cb()
+            #self.auto_cb()
             beam_current_string = str(microscope.beams.ion_beam.beam_current.value)
             ref_img=self.take_image_IB()
             now = datetime.datetime.now()
@@ -813,7 +821,7 @@ class fibsem:
                     self.log_output = self.log_output + "Distance is greater than 10 microns. Abort.\n"
                     break
             #microscope.auto_functions.run_auto_cb()
-            self.auto_cb()
+            #self.auto_cb()
 
 
         return()
@@ -1047,8 +1055,55 @@ class fibsem:
         Action: runs auto contrast brightness
         '''
         #microscope.auto_functions.run_auto_cb()
+        
         print('Insert AutoCB function here')
-        return()
+        contrast_values=[10,20,30,40,50]
+        #
+        print('Beam current is:')
+        #print(microscope._beams.ion_beam.beam_current.value)
+        settings=GrabFrameSettings(dwell_time=10e-08,resolution='512x384',line_integration=1)
+        current=self.get_current()
+        print(current)
+        if current < 500e-12:
+            contrast_values=[20,30,40,50,60,70,80,90,100]
+        if current > 500e-12:
+            contrast_values=[15,20,25,30,35,40,45,50,55,60,65,70,75,80]
+        contrast_list=[]
+        for value in contrast_values:
+            self.set_cb(value)
+            image1=self.take_image_IB(settings)
+            image1=image1.data
+            min=np.min(image1)
+            max=np.max(image1)
+            print(min)
+            print(max)
+            if max > 220:
+                break
+                #contrast = (max-min)/(max+min)
+                contrast = (max-min)
+                contrast_list.append(contrast)
+        
+        print(contrast_list)
+        #self.set_cb(40)
+        #image1=self.take_image_IB()
+        #data1=image1.data
+        #print(data1)
+        ##time.sleep(5)
+        #self.set_cb(30)
+        ##time.sleep(0.5)
+        #image2=self.take_image_IB()
+        #data2=image2.data
+        #print(data2)
+        
+        
+
+        return
+    
+  
+    def set_cb(self,contrast,brightness=50.1):
+        microscope.imaging.set_contrast(contrast)
+        microscope.imaging.set_brightness(brightness)
+        return
 
 
 
