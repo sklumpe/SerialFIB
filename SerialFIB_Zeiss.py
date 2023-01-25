@@ -49,7 +49,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 vendor='Zeiss'
 #### IMPORT AUTOSCRIPT STRUCTURES
 if vendor=='Zeiss':
-    from src.Zeiss.CrossbeamDriver import fibsem
+    from src.Zeiss.CrossbeamDriver import fibsem, DummyAdorned
 
 else:
     try:
@@ -1075,7 +1075,10 @@ class Ui_MainWindow(object):
             array8u=cv2.convertScaleAbs(array, alpha=(255.0/65535.0))
         
             img_8bit=np.uint8(array)
-            img_8bit = cv2.cvtColor(img_8bit,cv2.COLOR_BGR2GRAY)
+            try:
+                img_8bit = cv2.cvtColor(img_8bit,cv2.COLOR_BGR2GRAY)
+            except:
+                print("Couldn't convert colored image, probably already grayscale")
             ### Changed as colored picture comes from the Zeiss API
             #height,width=np.shape(img_8bit)
             height,width=np.shape(img_8bit)[0],np.shape(img_8bit)[1]
@@ -1094,7 +1097,7 @@ class Ui_MainWindow(object):
             self.sceneBuffer[int(number)]=scene
 
         except:
-
+            
             print("ERROR")
 
         if str(number) in self.corrspots:
@@ -1516,7 +1519,9 @@ class Ui_MainWindow(object):
             imgfile, _ = QtWidgets.QFileDialog.getOpenFileName(None, "IB image before correlation",self.output_dir,"Images (*.tif)")
             print(imgfile)
             self.checkBox_fluo.setChecked(False)
-            img=AdornedImage.load(imgfile)
+            img=DummyAdorned()
+            img.load(imgfile)
+            #img=DummyAdorned.load(imgfile)
             numRows = self.ImageBuffer.count()
             self.ImageBuffer.addItem(str(numRows) + " (IB Image)")
             scene=self.get_scene()
@@ -1525,7 +1530,12 @@ class Ui_MainWindow(object):
             scene.clear()
 
             array=img.data
-            self.ImageBufferImages.append(img)
+
+            img_8bit=np.uint8(array)
+            #img_8bit = cv2.cvtColor(img_8bit,cv2.COLOR_BGR2GRAY)
+            img_copy=img
+            img_copy.data=img_8bit
+            self.ImageBufferImages.append(img_copy)
 
             if img.bit_depth == 8:
                 qImg=QtGui.QImage(img.data.copy(), img.width, img.height, img.width, QtGui.QImage.Format_Grayscale8)
@@ -1573,6 +1583,7 @@ class Ui_MainWindow(object):
 
             self.scene=scene
             self.sceneBuffer.append(self.scene)
+
 
             #except:
             #    print("No adequate Image selected")

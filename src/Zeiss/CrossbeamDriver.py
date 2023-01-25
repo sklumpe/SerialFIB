@@ -39,6 +39,8 @@ microscope = MicroscopeClient()
 
 from src.Zeiss.custom_matchers_Zeiss import *
 
+from src.Zeiss.tiff_handle import write_tiff,read_tiff
+#from src.Zeiss.tiff_handle import read_tiff
 #from src.read_SAV import read_SAV_params
 import cv2
 import numpy as np
@@ -76,8 +78,29 @@ class DummyAdorned():
         self.height=768
         #self.metadata.binary_result.pixel_size=1e-06
     def save(self,filepath):
-        cv2.imwrite(filepath,self.data)
+        #cv2.imwrite(filepath,self.data)
+        
+        write_tiff(filepath,self.data,self.metadata.binary_result.pixel_size.x)
         print("An Image should have been saved, to be implemented!!")
+    def load(self,filepath):
+        print('Loading Image')
+        img=cv2.imread(filepath)
+        print(img)
+        ### Convert 16 bit image to 8 bit to show it in the GraphicsView
+        array8u=cv2.convertScaleAbs(img, alpha=(255.0/65535.0))
+        img_8bit=np.uint8(img)
+        img_8bit = cv2.cvtColor(img_8bit,cv2.COLOR_BGR2GRAY)
+        print(np.shape(img_8bit))
+        height,width=img_8bit.shape
+        self.height=height
+        self.width=width
+        self.data=img_8bit
+        
+        _, pixel_size = read_tiff(filepath)
+        print(pixel_size)
+        #print(meta_dict)
+        self.metadata.binary_result.pixel_size=Point(pixel_size,pixel_size)
+        #return
 
 class DummyPattern():
     def __init__(self):
