@@ -150,8 +150,8 @@ class fibsem:
         #self.APIpath=r'C:/Users/Sven/Pictures/test3.tif'
         
 
-        self.dummy_pattern=r"D:/UserData/RoSa/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
-        self.probe_table=r"D:/UserData/RoSa/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml"
+        self.dummy_pattern=r"D:/SerialFIB/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
+        self.probe_table=r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
         self.APIpath="C:/api/Grab.tif"
         self.connect()
     
@@ -475,6 +475,13 @@ class fibsem:
 
 
         print("I made it here")
+    def test_mag(self,image):
+        img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
+        ### Added lines Heidelberg
+        img_pixelsize= image.metadata.binary_result.pixel_size.x
+        print(img_pixelsize*np.shape(image.data)[1])
+        microscope.imaging.set_field_width(float(img_pixelsize*np.shape(image.data)[1]))
+        return()
 
     def align(self,image,beam,current=1.0e-11):
         '''
@@ -496,10 +503,20 @@ class fibsem:
 
                 # Get resolution of reference image and set microscope to given HFW
                 img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
+                
+                img_pixelsize= image.metadata.binary_result.pixel_size.x
+
+                dummy=self.take_image_IB()
+                microscope.imaging.set_field_width(float(img_pixelsize*np.shape(image.data)[1]))
+                
+                
+                
                 microscope.beams.ion_beam.scanning.resolution.value=img_resolution
                 microscope.beams.ion_beam.beam_current.value=current
                 time.sleep(2)
                 beam_current_string=str(microscope.beams.ion_beam.beam_current.value)
+
+                
 
 
                 # Get HFW from Image

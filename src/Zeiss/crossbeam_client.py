@@ -183,7 +183,7 @@ class BeamCurrent():
         self._sem = sem
         #self.probe_table = readProbeTable(probe_table_path)
         #self.probe_table = readProbeTable(r"D:/Images/RoSa/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml")
-        self.probe_table = r"D:/Images/RoSa/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml"
+        self.probe_table = r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
     @property
     def source(self) -> str:
         """Get the set beam current"""
@@ -511,6 +511,11 @@ class Imaging():
         return
     def set_brightness(self,value):
         self._sem.SetValue("AP_BRIGHTNESS", value)
+        return
+    def set_field_width(self,value):
+        self._sem.Execute("CMD_UNFREEZE_ALL")
+        self._sem.SetValue("AP_WIDTH", value)
+        self._sem.Execute("CMD_FREEZE_ALL")
         return
 
 # TODO: 2
