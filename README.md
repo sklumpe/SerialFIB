@@ -59,6 +59,34 @@ They can be installed by typing
 
 into the command-line of your OS.
 
+
+### Installation on Zeiss Microscopes ###
+
+In order to install SerialFIB on Zeiss microscopes, you need to install the Zeiss SmartSEM API on your CrossBeam. Then, a clean conda installation with the packages as described above for TFS instruments will get you everything you need for running SerialFIB. The installation will be made easier in the future, and these improvements are undergoing. Until then, you will need to change following parameters in the Zeiss CrossBeam Driver to the appropriate file locations: 
+
+In src/Zeiss/CrossbeamDriver.py:
+
+self.dummy_pattern=r"D:/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
+
+Pointing to the SerialFIB installation Directory.
+
+And potentially (this should be at the same location for any SmartSEM installation but might differ if it is not a standard installation):
+self.probe_table=r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
+
+pointing towards the ProbeTable of the microscope. 
+
+Additionally, make sure that the standard API directory "C:/api/" exists, and if not, create it. 
+
+Same goes for the standard API Drop directory:
+C:/ProgramData/Carl Zeiss/SmartFIB/API/Drop/
+
+Zeiss is working on the API installer to make sure that these are created automatically, but this is currently not the case. 
+
+In the crossbeam_client.py file, you might need to adjust the path to the ProbeTable as described above:
+self.probe_table = r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
+
+That should be all. As mentioned before, installation will be improved to be more plug-and-play. If you run into problems, just drop an E-Mail to "klumpe@biochem.mpg.de".
+
 ### Usage ###
 
 A tutorial on how to use SerialFIB can be found in the repository. [https://github.com/sklumpe/SerialFIB/blob/main/20210428_SerialFIB_Tutorial.pdf](https://github.com/sklumpe/SerialFIB/blob/main/20210428_SerialFIB_Tutorial.pdf).
