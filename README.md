@@ -71,6 +71,7 @@ In src/Zeiss/CrossbeamDriver.py:
 Pointing to the SerialFIB installation Directory.
 
 And potentially (this should be at the same location for any SmartSEM installation but might differ if it is not a standard installation):
+
 	self.probe_table=r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
 
 pointing towards the ProbeTable of the microscope. 
@@ -78,11 +79,13 @@ pointing towards the ProbeTable of the microscope.
 Additionally, make sure that the standard API directory "C:/api/" exists, and if not, create it. 
 
 Same goes for the standard API Drop directory:
+
 	C:/ProgramData/Carl Zeiss/SmartFIB/API/Drop/
 
 Zeiss is working on the API installer to make sure that these are created automatically, but this is currently not the case. 
 
 In the crossbeam_client.py file, you might need to adjust the path to the ProbeTable as described above:
+
 	self.probe_table = r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
 
 That should be all. As mentioned before, installation will be improved to be more plug-and-play. If you run into problems, just drop an E-Mail to "klumpe@biochem.mpg.de".
