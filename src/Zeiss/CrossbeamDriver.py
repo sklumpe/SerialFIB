@@ -1,4 +1,4 @@
-#### FIB SEM Aquilos Driver ####
+﻿#### FIB SEM Aquilos Driver ####
 '''
 ################################################################
 #                         SerialFIB                            #
@@ -150,7 +150,7 @@ class fibsem:
         #self.APIpath=r'C:/Users/Sven/Pictures/test3.tif'
         
 
-        self.dummy_pattern=r"D:/SerialFIB/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
+        self.dummy_pattern=r"D:/User_Data/Sven/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
         self.probe_table=r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
         self.APIpath="C:/api/Grab.tif"
         self.connect()
@@ -411,6 +411,7 @@ class fibsem:
         print(old_resolution)
         old_mag=microscope.beams.ion_beam.horizontal_field_width.value
         print(old_mag)
+        self.test_mag(image)
         ## Get resolution of reference image and set microscope to given HFW
         img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
         
@@ -496,6 +497,7 @@ class fibsem:
             if beam=='ION':
                 print('Running alignment')
                 microscope.imaging.set_active_view(2)
+                self.test_mag(image)
 
                 # Get old resolution of images to go back after alignment
                 old_resolution=microscope.beams.ion_beam.scanning.resolution.value
@@ -661,6 +663,7 @@ class fibsem:
                 microscope.imaging.set_active_view(2)
                 old_resolution = microscope.beams.ion_beam.scanning.resolution.value
                 old_mag = microscope.beams.ion_beam.horizontal_field_width.value
+                self.test_mag(image)
 
                 # microscope.beams.ion_beam.scanning.resolution.value='768x512'
                 img_resolution = str(np.shape(image.data)[1]) + 'x' + str(np.shape(image.data)[0])
