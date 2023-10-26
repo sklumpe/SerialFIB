@@ -231,7 +231,7 @@ fibsem=fibsem()
         #cmd='python tmp.py >_ && type _ && type _ > ScriptEditor.log'
         #cmd='python tmp.py > ScriptEditor.log & type ScriptEditor.log'
         #cmd='python '+'tmp.py >> ScriptEditor.log'
-        cmd='"C:/Users/Sven/AppData/Local/Programs/Python/Python310/python.exe" tmp.py'
+        cmd='python tmp.py'
 
         #progressDialog = QtWidgets.QDialog()
         #verticalLayout = QtWidgets.QVBoxLayout(progressDialog)
