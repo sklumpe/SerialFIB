@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Layer Name="Abcd" Version="1.0">
+  <Settings WriteFieldSize="0.000250"
+            Process="I-Etching"                 
+            Parallel="0"
+            Rate="3.0e-3"
+            DwellTime="1.0e-6"                  
+            Accuracy="Fine"
+            SpotSize="5.0e-8"
+            Spacing="1.0"               
+            BeamCurrent="1.0e-9" />
+  <Object Type="RectangleFilled"
+          Center="0.0 0.0"
+          Width="0.000180"      
+          Height="0.000120"
+          Angle="0.0"
+          ScanningPath="0"
+          Depth="5.0e-6"        
+          DepthUnit="m"
+          ExpositionFactor="1.0" />
+  <Object Type="RectanglePolish"
+          Center="0.0 0.0"
+          Width="0.000180"      
+          Height="0.000120"
+          Angle="0.0"
+          ScanningPath="0"
+          Depth="5.0e-6"        
+          DepthUnit="m"
+          ExpositionFactor="1.0" />
+</Layer>
