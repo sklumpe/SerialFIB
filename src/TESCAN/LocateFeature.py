@@ -28,6 +28,7 @@ def locate_feature(image,feature_template,template_matcher,original_feature_cent
     ### Feature Location in Meters adjustment with image pixel size
     #print(match.center.x)
     print(match.center)
-    #feature_location.center_in_meters=Point(match.center.x*image_pixel_size.x,match.center.y*image_pixel_size.x)
+    print(image_pixel_size)
+    feature_location.center_in_meters=Point(match.center.x*float(image_pixel_size.x),match.center.y*float(image_pixel_size.x))
     return(feature_location)
     

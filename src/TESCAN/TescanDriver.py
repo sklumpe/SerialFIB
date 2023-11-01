@@ -121,6 +121,7 @@ class DummyAdorned():
         print(pixel_size)
         #print(meta_dict)
         self.metadata.binary_result.pixel_size=Point(pixel_size,pixel_size)
+        
         #return
 
 class DummyPattern():
@@ -368,7 +369,7 @@ class fibsem:
         imageHeight = 512
         # for simultaneous acquisition from multiple channels, we use this way of acquisition
         channel=0
-        channel1=6
+        channel1=2
         #channel2=
         images = self.tescanScope.FIB.Scan.AcquireImagesFromChannels((channel,channel1), imageWidth, imageHeight, 320)
         print(images[0])
@@ -376,7 +377,8 @@ class fibsem:
         image=np.array(images[1].Image)
         img=DummyAdorned()
         img.data=image
-
+        pixel_size=images[1].Header['MAIN']['PixelSizeX']
+        img.metadata.binary_result.pixel_size=Point(pixel_size,pixel_size)
         print(images[1].Header.OPTCRE)
         #microscope.beams.electron_beam.turn_off()
         #print("Electron beam turned off")
@@ -587,7 +589,7 @@ class fibsem:
             #microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
             ###
             
-            self.tescanScope.FIB.Optics.SetViewfield(image.metadata.optics.scan_field_of_view.width)
+            #self.tescanScope.FIB.Optics.SetViewfield(image.metadata.optics.scan_field_of_view.width)
             #microscope.beams.ion_beam.horizontal_field_width.value =
             #microscope.auto_functions.run_auto_cb()
             detectors = self.tescanScope.FIB.Detector.Enum()
@@ -612,7 +614,7 @@ class fibsem:
             move_count = 0
 
             now = datetime.datetime.now()
-            current_img.save(self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif')
+            #current_img.save(self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif')
             self.log_output=self.log_output+"Saved Image as : "+self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif'+'\n'
 
             # If cross correlation metric too low, continue movements for maximum 3 steps
@@ -641,11 +643,11 @@ class fibsem:
                     if rotation==0:
                         
                         #pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
-                        pos_corr={'x':float(-x),'y':float(-y),'z':0,'r':0,'t':0}
+                        pos_corr={'x':float(x*1e03),'y':float(y*1e03),'z':0,'r':0,'t':0}
                         print('Rotation is zero')
                     else:
                         #pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
-                        pos_corr={'x':float(x),'y':float(y),'z':0,'r':0,'t':0}
+                        pos_corr={'x':float(-x*1e03),'y':float(-y*1e03),'z':0,'r':0,'t':0}
                         #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
                         print('Rotation is NOT zero')
                     #microscope.specimen.stage.relative_move(pos_corr)
@@ -664,17 +666,17 @@ class fibsem:
                     new_x=ox+x
                     new_y=oy+y
                     new_shift=[new_x,new_y]
-                    self.tescanScope.FIB.Optics.SetImageShift(new_shift)
+                    self.tescanScope.FIB.Optics.SetImageShift(new_x,new_y)
                     #microscope.beams.ion_beam.beam_shift.value += Point(x,y) # incremental
 
                 move_count += 1
 
                 current_img = self.take_image_IB()
                 now = datetime.datetime.now()
-                current_img.save(self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif')
+                #current_img.save(self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif')
 
                 self.log_output = self.log_output + "Saved Image as : " +self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif'+'\n'
-                l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
+                l = locate_feature(current_img, image, favourite_matcher)
                 print("Current confidence: " + str(l.confidence))
                 self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
 
