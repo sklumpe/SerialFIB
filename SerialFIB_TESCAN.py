@@ -60,6 +60,8 @@ from src.LamellaDesigner import Ui_LamellaDesigner
 from src.VolumeDesigner import Ui_VolumeDesigner
 from src.Param3D import Param3D
 
+
+
 ### INITIALIZE MICROSCOPE FROM DRIVER
 scope=fibsem()
 ###
@@ -1407,6 +1409,16 @@ class Ui_MainWindow(object):
         return()
     
     def write_patterns(self):
+
+        from tescanautomation import Automation
+        from tescanautomation.DrawBeam import Layer
+        from tescanautomation.DrawBeam import IEtching
+        from tescanautomation.DrawBeam import ExpositionMeshAccuracy as DBAccuracy
+        from tescanautomation.DrawBeam import DepthUnit as DBDepthUnit
+        from tescanautomation.DrawBeam import ScanningPath
+        from tescanautomation.DrawBeam import Status as DBStatus
+
+
         directory=self.output_dir+'/'
         for i in range(0,self.tableWidget.rowCount()):
             #print(i)
@@ -1419,6 +1431,7 @@ class Ui_MainWindow(object):
             alignment_image_number=int(self.tableWidget.item(i,6).text())
             alignment_image=self.ImageBufferImages[alignment_image_number]
             pixel_size=alignment_image.metadata.binary_result.pixel_size.x
+            print(pixel_size)
             image_shape=np.shape(alignment_image.data)
 
             pattern_number=int(self.tableWidget.item(i,7).text())
@@ -1427,13 +1440,14 @@ class Ui_MainWindow(object):
                 continue
             else:
                 #try:
+                
                 patterns=self.pattern_dict[str(pattern_number)]
                 patterns=sorted(patterns, key=lambda pattern: pattern.y)
                 name_list=['tp','lamella','bp']
                 num=0
                 print(patterns)
                 for i in patterns:
-                    
+                    #print("I made it here")
                     pattern_filename=str(label)+'_'+str(name_list[num])+".ptf"
                     num=num+1
                     pos=i.pos()
@@ -1444,11 +1458,25 @@ class Ui_MainWindow(object):
                     #x=(pos.x()-image_shape[1]/2)+h/2
                     #y=-w/2-(pos.y()-image_shape[0]/2)
                     #try:
-                    x=(pos.x()-image_shape[1]/2)
-                    y=-(pos.y()-image_shape[0]/2)-w
-                    pattern=scope.create_pattern(x*pixel_size,y*pixel_size,w*pixel_size,h*pixel_size)
-                    print(pattern)
-                    scope.save_pattern(lamella_dir,pattern_filename,pattern)
+                    #x=(pos.x()-image_shape[1]/2)
+                    x=pos.x()
+                    #y=-(pos.y()-image_shape[0]/2)-w
+                    y=pos.y()
+                    print(x,y)
+                    #pattern=self.tescanScope.
+                    layerSettings = IEtching(False, 85e-6, 10e-9, 50e-9, 4.7e-10, 1e-6, DBAccuracy.Fine, 1, True)
+                    label1='Pattern'
+                    layer = Layer(label1, layerSettings)
+                    d=1e-06
+                    layer.addRectangleStairs(x, y, d, w, h, 0, DBDepthUnit.Meter, 1, 1, ScanningPath.ZigZag)
+
+                    #self.tescanScope.DrawBeam.LoadLayer(layer)
+                    #pattern=scope.create_pattern(x*pixel_size,y*pixel_size,w*pixel_size,h*pixel_size)
+                    print(i)
+                    print("I made it here")
+                    #scope.save_pattern(lamella_dir,pattern_filename,pattern)
+                    print(layer,file=open(lamella_dir+pattern_filename,'w'))
+                    #layer.toXml(lamella_dir+pattern_filename)
                         #except:
                             # print("Error in Pattern Writing: No Microscope connected?")
                             # #pattern=Pattern(0,0,0,0,0,'UP')
