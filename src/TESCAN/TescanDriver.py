@@ -977,58 +977,61 @@ class fibsem:
         '''
         tree = ET.parse(directory+filename)
         root = tree.getroot()
-
         for element in root:
-            if element.tag == 'PatternRectangle':
-                inp_pattern_type='Rectangle'
-                inp_center_x = float(element.find('CenterX').text)
-                inp_center_y = float(element.find('CenterY').text)
-                inp_depth = float(element.find('Depth').text)
-                inp_height = float(element.find('Length').text)
-                inp_width = float(element.find('Width').text)
-                inp_scan_direction = str(element.find('ScanDirection').text)
-                inp_dwell_time=float(element.find('DwellTime').text)
+            print(element.tag)
+            if element.tag=='Settings':
+                print("bla")
+        # for element in root:
+        #     if element.tag == 'PatternRectangle':
+        #         inp_pattern_type='Rectangle'
+        #         inp_center_x = float(element.find('CenterX').text)
+        #         inp_center_y = float(element.find('CenterY').text)
+        #         inp_depth = float(element.find('Depth').text)
+        #         inp_height = float(element.find('Length').text)
+        #         inp_width = float(element.find('Width').text)
+        #         inp_scan_direction = str(element.find('ScanDirection').text)
+        #         inp_dwell_time=float(element.find('DwellTime').text)
 
-            if element.tag == 'PatternRegularCrossSection':
-                inp_pattern_type='RegularCrossSection'
-                inp_center_x = float(element.find('CenterX').text)
-                inp_center_y = float(element.find('CenterY').text)
-                inp_depth = float(element.find('Depth').text)
-                inp_height = float(element.find('Length').text)
-                inp_width = float(element.find('Width').text)
-                inp_scan_direction = str(element.find('ScanDirection').text)
-                inp_dwell_time=float(element.find('DwellTime').text)
+        #     if element.tag == 'PatternRegularCrossSection':
+        #         inp_pattern_type='RegularCrossSection'
+        #         inp_center_x = float(element.find('CenterX').text)
+        #         inp_center_y = float(element.find('CenterY').text)
+        #         inp_depth = float(element.find('Depth').text)
+        #         inp_height = float(element.find('Length').text)
+        #         inp_width = float(element.find('Width').text)
+        #         inp_scan_direction = str(element.find('ScanDirection').text)
+        #         inp_dwell_time=float(element.find('DwellTime').text)
 
-            if element.tag == 'PatternCleaningCrossSection':
-                inp_pattern_type='CleaningCrossSection'
-                inp_center_x = float(element.find('CenterX').text)
-                inp_center_y = float(element.find('CenterY').text)
-                inp_depth = float(element.find('Depth').text)
-                inp_height = float(element.find('Length').text)
-                inp_width = float(element.find('Width').text)
-                inp_scan_direction = str(element.find('ScanDirection').text)
-                inp_dwell_time=float(element.find('DwellTime').text)
+        #     if element.tag == 'PatternCleaningCrossSection':
+        #         inp_pattern_type='CleaningCrossSection'
+        #         inp_center_x = float(element.find('CenterX').text)
+        #         inp_center_y = float(element.find('CenterY').text)
+        #         inp_depth = float(element.find('Depth').text)
+        #         inp_height = float(element.find('Length').text)
+        #         inp_width = float(element.find('Width').text)
+        #         inp_scan_direction = str(element.find('ScanDirection').text)
+        #         inp_dwell_time=float(element.find('DwellTime').text)
 
-        if inp_pattern_type=='Rectangle':
-            pattern=microscope.patterning.create_rectangle(center_x=inp_center_x, center_y=inp_center_y,depth=inp_depth,height=inp_height,width=inp_width)
-        elif inp_pattern_type=='CleaningCrossSection':
-            pattern = microscope.patterning.create_cleaning_cross_section(center_x=inp_center_x, center_y=inp_center_y, depth=inp_depth, height=inp_height, width=inp_width)
-        elif inp_pattern_type=='RegularCrossSection':
-            pattern=microscope.patterning.create_regular_cross_section(center_x=inp_center_x, center_y=inp_center_y, depth=inp_depth, height=inp_height, width=inp_width)
+        # if inp_pattern_type=='Rectangle':
+        #     pattern=microscope.patterning.create_rectangle(center_x=inp_center_x, center_y=inp_center_y,depth=inp_depth,height=inp_height,width=inp_width)
+        # elif inp_pattern_type=='CleaningCrossSection':
+        #     pattern = microscope.patterning.create_cleaning_cross_section(center_x=inp_center_x, center_y=inp_center_y, depth=inp_depth, height=inp_height, width=inp_width)
+        # elif inp_pattern_type=='RegularCrossSection':
+        #     pattern=microscope.patterning.create_regular_cross_section(center_x=inp_center_x, center_y=inp_center_y, depth=inp_depth, height=inp_height, width=inp_width)
 
 
-        pattern.dwell_time=inp_dwell_time
-        if inp_scan_direction=='BottomToTop':
-            pattern.scan_direction = PatternScanDirection.BOTTOM_TO_TOP
-        elif inp_scan_direction=='TopToBottom':
-            pattern.scan_direction = PatternScanDirection.TOP_TO_BOTTOM
-        elif inp_scan_direction=='LeftToRight':
-            pattern.scan_direction = PatternScanDirection.LEFT_TO_RIGHT
-        elif inp_scan_direction=='RightToLeft':
-            pattern.scan_direction = PatternScanDirection.RIGHT_TO_LEFT
-        else:
-            print("!!! CATION !!! \n Could not recognize ScanDirection of pattern \n !!! CAUTION !!!")
-        return(pattern)
+        # pattern.dwell_time=inp_dwell_time
+        # if inp_scan_direction=='BottomToTop':
+        #     pattern.scan_direction = PatternScanDirection.BOTTOM_TO_TOP
+        # elif inp_scan_direction=='TopToBottom':
+        #     pattern.scan_direction = PatternScanDirection.TOP_TO_BOTTOM
+        # elif inp_scan_direction=='LeftToRight':
+        #     pattern.scan_direction = PatternScanDirection.LEFT_TO_RIGHT
+        # elif inp_scan_direction=='RightToLeft':
+        #     pattern.scan_direction = PatternScanDirection.RIGHT_TO_LEFT
+        # else:
+        #     print("!!! CATION !!! \n Could not recognize ScanDirection of pattern \n !!! CAUTION !!!")
+        # return(pattern)
     def pattern_directory_parser(self,directory):
         '''
         Input: Directory path as string
