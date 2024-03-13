@@ -1,0 +1,106 @@
+### Testing cryo-FIB custom milling ### 
+
+### User Input ###
+output_dir=r'D:/Users/sklumpe/20221124_WaffleDev/CombinedTry/Try2/'
+
+patternfile_trench=r'D:/Users/sklumpe/20221124_WaffleDev/AutomationTesting/FinalFiles/01_large_trench.pf'
+
+patternfile_roughjob1=r'D:/Users/sklumpe/20221124_WaffleDev/AutomationTesting/FinalFiles/02_roughmill_job1.pro'
+
+patternfile_nodge=r'D:/Users/sklumpe/20221124_WaffleDev/AutomationTesting/FinalFiles/03_notch_PFIB.pf'
+
+lamella_protocol=r'D:/Users/sklumpe/20221124_WaffleDev/AutomationTesting/FinalFiles/04_lamellamill.pro'
+
+fibsem.alignment_current=50e-12
+img_index_trench=7
+stagepos_index_trench=0
+pattern_index_trench=7
+
+img_index_roughjob1=0
+stagepos_index_roughjob1=1
+pattern_index_roughjob1=0
+
+img_index_nodge=1
+stagepos_index_nodge=2
+pattern_index_nodge=1
+
+img_index_lamella=3
+stagepos_index_lamella=3
+pattern_index_lamella=3
+
+#############
+
+
+#### Initial Trench from Above ####
+
+### Definition of variables ###
+
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index_trench]['label']
+alignment_image=images[img_index_trench]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_trench]
+
+fibsem.write_patterns(label,patterns[pattern_index_trench],alignment_image,output_dir)
+
+
+fibsem.run_milling_custom(label,alignment_image,stagepos,pattern_dir,patternfile_trench)
+
+
+####Rough milling before Notch ####
+
+### Definition of variables ###
+
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index_roughjob1]['label']
+alignment_image=images[img_index_roughjob1]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_roughjob1]
+
+#print(patterns)
+fibsem.write_patterns(label,patterns[pattern_index_roughjob1],alignment_image,output_dir)
+
+
+### Creating patternfile ###
+
+
+
+fibsem.run_milling_protocol(label,alignment_image,stagepos,pattern_dir,patternfile_roughjob1)
+
+
+#### Nodge Milling ####
+
+label=stagepositions[stagepos_index_nodge]['label']
+alignment_image=images[img_index_nodge]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_nodge]
+
+fibsem.write_patterns(label,patterns[pattern_index_nodge],alignment_image,output_dir)
+
+fibsem.run_milling_custom(label,alignment_image,stagepos,pattern_dir,patternfile_nodge)
+
+
+
+#### Lamella Milling ####
+
+
+
+#############
+
+### Definition of variables ###
+
+fibsem.output_dir=output_dir+'/'
+label=stagepositions[stagepos_index_lamella]['label']
+alignment_image=images[img_index_lamella]
+pattern_dir=output_dir+'/'+str(label)+'/'
+stagepos=stagepositions[stagepos_index_lamella]
+
+#print(patterns)
+fibsem.write_patterns(label,patterns[pattern_index_lamella],alignment_image,output_dir)
+
+
+### Creating patternfile ###
+
+
+
+fibsem.run_milling_protocol(label,alignment_image,stagepos,pattern_dir,lamella_protocol)
