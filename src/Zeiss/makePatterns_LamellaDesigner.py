@@ -39,7 +39,8 @@ def makePatterns_LamellaDesigner(step,side,thickness_lamella,thickness_patterns,
     '''
     import numpy as np
     
-    offset_y=(thickness_patterns+thickness_lamella)/2#(thickness_lamella/2)#+thickness_patterns/2
+    #offset_y=(thickness_patterns+thickness_lamella)/2#(thickness_lamella/2)#+thickness_patterns/2
+    offset_y=thickness_patterns
     #Offset_x=
     filename='/patternfile_from_protocol.pf'
 

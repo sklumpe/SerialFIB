@@ -1183,6 +1183,77 @@ class fibsem:
         print("Done")
         return()
 
+
+    def create_trench_patterns(self,directory,pattern_lamella,pattern_above,pattern_below):
+        '''
+        Input: Directory containing the user input from the SerialFIB GUI as xT patterns
+        Output: AutoScript4 "pattern" objects for trench milling
+        Action: None
+        '''
+        pattern_above = self.pattern_parser(directory, pattern_above)
+        start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+        pattern_below = self.pattern_parser(directory, pattern_below)
+        start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+        pattern_lamella = self.pattern_parser(directory, pattern_lamella)
+        lamella_center_x = pattern_lamella.center_x
+        lamella_center_y = pattern_lamella.center_y
+        width_lamella = pattern_lamella.width
+        top_center_y=pattern_above.center_y
+        bottom_center_y=pattern_below.center_y
+        height=abs(top_center_y-bottom_center_y)
+
+        width = 0.5e-06
+
+        #left_trench_x=(lamella_center_x)#-0.5*width_lamella-self.trench_offset
+        left_trench_x=(lamella_center_x)-self.trench_offset-width
+        right_trench_x=(lamella_center_x)+1*width_lamella+self.trench_offset 
+
+        pattern_left = self.create_pattern(left_trench_x, lamella_center_y - height/2, height, width)
+        pattern_right = self.create_pattern(right_trench_x, lamella_center_y - height/2, height, width)
+
+        return (pattern_left, pattern_right)
+
+    def run_trench_milling(self,lamella_name,alignment_image,stagepos,pattern_ref_directory):
+        '''
+        Input: Lamella Name from positions list, Alignment image as Numpy array,
+                stageposition as dictionary, Directory of the patterns defined through the SerialFIB GUI
+        Output: log for printing
+        Action: Runs the trench milling for the provided position
+        '''
+
+        patterns_reference_directory = pattern_ref_directory
+        patterns_output_directory = pattern_ref_directory[:-1] + '_out/'
+        try:
+            os.mkdir(patterns_output_directory)
+        except:
+            self.log_output = self.log_output + "Pattern Directory already existed!!!" + '\n'
+        self.lamella_name = lamella_name
+
+        pattern_left,pattern_right=self.create_trench_patterns(patterns_reference_directory,str(lamella_name)+'_lamella.ptf',str(lamella_name)+'_tp.ptf',str(lamella_name)+'_bp.ptf')
+
+        pattern_left_name = lamella_name + str('_trench_left.ptf')
+        pattern_right_name = lamella_name + str('_trench_right.ptf')
+        self.save_pattern(patterns_output_directory, pattern_left_name, pattern_left, current=7e-10, time=60)
+        self.save_pattern(patterns_output_directory, pattern_right_name, pattern_right, current=7e-10, time=60)
+
+        self.moveStageAbsolute(stagepos)
+
+        ref_img = alignment_image
+        ref_img.save(patterns_output_directory[:-1] + '/before_trenches.tif')
+        self.align(ref_img, 'ION')
+
+        self.align_current(new_current=7e-10, beam='ION')
+        #print(patterns_output_directory,pattern_left_name)
+        #self.run_custom_milling(patterns_output_directory,pattern_left_name,milling_time=60)
+        #self.run_custom_milling(patterns_output_directory,pattern_right_name,milling_time=60)
+        self.test_pattern(patterns_output_directory+'/'+pattern_left_name)
+        self.test_pattern(patterns_output_directory+'/'+pattern_right_name)
+
+        #current_img = self.take_image_IB()
+        #current_img.save(patterns_output_directory[:-1] + '/after_trenches.tif')
+        return(self.log_output)
+
+
     def create_custom_protocol(self, directory, pattern_lamella, pattern_above, pattern_below, protocol_filename,mode='fine'):
         '''
         Input: Directory path as string, filename of lamella pattern, and extreme point patterns as string
@@ -1885,6 +1956,7 @@ class fibsem:
 
 
         return (self.log_output)
+
 
 
 

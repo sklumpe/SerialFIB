@@ -231,7 +231,7 @@ fibsem=fibsem()
         #cmd='python tmp.py >_ && type _ && type _ > ScriptEditor.log'
         #cmd='python tmp.py > ScriptEditor.log & type ScriptEditor.log'
         #cmd='python '+'tmp.py >> ScriptEditor.log'
-        cmd='python tmp.py'
+        cmd='C:/Users/sem/.conda/envs/serialfib/python.exe tmp.py'
 
         #progressDialog = QtWidgets.QDialog()
         #verticalLayout = QtWidgets.QVBoxLayout(progressDialog)
