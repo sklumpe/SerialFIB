@@ -1,0 +1,22 @@
+#    Step Name : Step 0
+Step_Name=Step 0
+Step=0
+IB_Current=60.0e-06
+Time=180
+Pattern=0
+Offset_y=-60.0e-06
+Offset_x=0.0e-06
+Height_y=80.0e-06
+Width_x=45.0e-06
+PatternType=Cross-Section
+ScanDirection=TopToBottom
+/Pattern
+Pattern=1
+Offset_y=40.0e-06
+Offset_x=0.0e-06
+Height_y=40.0e-06
+Width_x=45.0e-06
+PatternType=Cross-Section
+ScanDirection=BottomToTop
+/Pattern
+/Step

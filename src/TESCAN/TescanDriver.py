@@ -1,26 +1,22 @@
-﻿#### FIB SEM Aquilos Driver ####
+#### FIB SEM Aquilos Driver ####
 '''
 ################################################################
-#                         SerialFIB                            #
+#                SerialFIB TESCAN Implementation               #
 #                                                              #
-#            Sven Klumpe, Sara Goetz, Herman Fung              #
+#                    Sven Klumpe, Johann Brenner               #
 #                                                              #
-#                  Julia Mahamid, Jürgen Plitzko               #
+#                         Jürgen Plitzko                       #
 #                                                              #
 #             Max-Planck-Institute for Biochemistry            #
 #                    Martinsried, Germany                      #
-#                                                              #
-#             European Molecular Biology Laboratory            #
-#                    Heidelberg, Germany                       #
-#                                                              #
 #                                                              #
 #                                                              #
 #          if you use SerialFIB in your work, please cite:     #
 #                   DOI:                                       #
 #                                                              #
 #                                                              #
-#          SerialFIB: A Developer’s Tool for Automated         #
-#                 cryo-FIB Customized Workflows                #
+#          SerialFIB: A Modular Platform for Automated         #
+#                      cryo-FIB Workflows                      #
 #                                                              #
 #     with bug reports, suggestions, etc. please contact:      #
 #                   klumpe@biochem.mpg.de                      #
@@ -29,19 +25,47 @@
 
 
 #### IMPORT MICROSCOPE
-#from win32com import client
-#microscope = client.Dispatch('CZ.EMApiCtrl.1')
-#microscope.InitialiseRemoting()
+#try:
+#     from autoscript_sdb_microscope_client import SdbMicroscopeClient
+#     from autoscript_sdb_microscope_client.enumerations import *
+#     from autoscript_sdb_microscope_client.structures import *
+#     # Set Up Microscope
+#     microscope = SdbMicroscopeClient()
 
-#from crossbeam_client import *
-from src.Zeiss.crossbeam_client import *
-microscope = MicroscopeClient()
 
-from src.Zeiss.custom_matchers_Zeiss import *
+#     from autoscript_toolkit.template_matchers import * 
+#     import autoscript_toolkit.vision as vision_toolkit
+#     from src.custom_matchers_v3 import *
+# except:
+#     print("No Autoscript installed")
+from tescanautomation import Automation
+from tescanautomation.DrawBeam import Layer
+from tescanautomation.DrawBeam import IEtching
+from tescanautomation.DrawBeam import ExpositionMeshAccuracy as DBAccuracy
+from tescanautomation.DrawBeam import DepthUnit as DBDepthUnit
+from tescanautomation.DrawBeam import ScanningPath
+from tescanautomation.DrawBeam import Status as DBStatus
+from src.TESCAN.tescan_client import MicroscopeClient
+from src.TESCAN.tescan_client_utils import get_closest_preset
+from src.TESCAN.LocateFeature import *
+from src.Zeiss.tiff_handle import *
+microscope=MicroscopeClient()
+microscope.connect()
+try:
+    
+    from tescanautomation import Automation
+    import time
+    # for easier usage
+    from tescanautomation.Common import Bpp
+    #from src.Zeiss.custom_matchers_Zeiss import *
+    from src.TESCAN.custom_matchers_TESCAN import *
+    
+    #from src.Zeiss.tiff_handle import write_tiff,read_tiff
+except:
+    print("TESCAN not installed on the machine.")
 
-from src.Zeiss.tiff_handle import write_tiff,read_tiff
-#from src.Zeiss.tiff_handle import read_tiff
-#from src.read_SAV import read_SAV_params
+
+from src.read_SAV import read_SAV_params
 import cv2
 import numpy as np
 import time
@@ -49,6 +73,9 @@ import xml.etree.ElementTree as ET
 import os
 import datetime
 import sys
+
+
+
 
 class binary_result():
     def __init__(self):
@@ -100,6 +127,7 @@ class DummyAdorned():
         print(pixel_size)
         #print(meta_dict)
         self.metadata.binary_result.pixel_size=Point(pixel_size,pixel_size)
+        
         #return
 
 class DummyPattern():
@@ -112,15 +140,6 @@ class DummyPattern():
         self.center_x=0
         self.center_y=0
 
-
-#try:
-#    microscope.connect()
-#except:
-#    print("Couldn't connect to microscope, connecting to localhost")
-#    try:
-#        microscope.connect('localhost')
-#    except:
-#        print("Loading Testimages")
 
 
 class fibsem:
@@ -138,25 +157,44 @@ class fibsem:
         self.lamella_name=''
         self.alignment_img_buffer=None
         self.SAVparamsfile=''
-        self.testing=False
+
         # Default alignment current
         self.alignment_current = float(1e-11)
         self.trench_offset = 4e-06
         # Variable for stopping operation
         self.continuerun = True
-
-        #self.dummy_pattern=r"C:/Users/Sven/Desktop/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
-        #self.probe_table=r'C:/Users/Sven/Desktop/GitHub/SerialFIB/src/Zeiss/ExampleFiles/ProbeTable.xml'
-        #self.APIpath=r'C:/Users/Sven/Pictures/test3.tif'
         
+        self.GIS=None
+        try:
+            microscope.specimen.stage.set_default_coordinate_system('Raw')
+        except:
+            print('no microscope connected')
 
-        self.dummy_pattern=r"D:/User_Data/Sven/SerialFIB/TemplatePatterns/Zeiss/layout001.ely"
-        self.probe_table=r"C:/ProgramData/Carl Zeiss/SmartSEM/Config/ProbeTable.xml"
-        self.APIpath="C:/api/Grab.tif"
-        self.connect()
-    
-    def __exit__(self):
-        self.disconnect()
+        initialise=True
+        if initialise==True:
+            microscope_ip = 'localhost'
+            self.tescanScope = Automation(microscope_ip)
+            detectors = self.tescanScope.FIB.Detector.Enum()
+            for detector in detectors:
+                print(detector.index, " ", detector.name)
+            print("")
+
+            # map detectors, set channels and enable them. We will set FIB to scan from detectors 0 and 1.
+            detector1 = detectors[0]
+            detector2 = detectors[1]
+            detector3 = detectors[2]
+            channel1 = 0
+            channel2 = 2
+            channel3 = 6
+            self.tescanScope.FIB.Detector.Set(channel1, detector1, Bpp.Grayscale_8_bit)
+            self.tescanScope.FIB.Detector.Set(channel2, detector2, Bpp.Grayscale_8_bit)
+            self.tescanScope.FIB.Detector.Set(channel3, detector3, Bpp.Grayscale_8_bit)
+            # check what is really selected
+            print("Channel ", channel1, ":", self.tescanScope.FIB.Detector.Get(channel1))
+            print("Channel ", channel2, ":", self.tescanScope.FIB.Detector.Get(channel2))
+            print("Channel ", channel3, ":", self.tescanScope.FIB.Detector.Get(channel3))
+            print("")
+            self.probeTable=self.tescanScope.FIB.Preset.Enum()
 
     def define_output_dir(self,directory):
         '''
@@ -188,9 +226,8 @@ class fibsem:
         Output: None
         Action: stop patterning if it is running
         '''
-        #if microscope.patterning.state=="Running":
-        #    microscope.patterning.stop()
-        return()
+        if microscope.patterning.state=="Running":
+            microscope.patterning.stop()
     def disconnect(self):
         '''
         Input: None
@@ -198,7 +235,6 @@ class fibsem:
         Action: Disconnect AutoScript4 server
         '''
         microscope.disconnect()
-        return()
     def connect(self):
         '''
         Input: None
@@ -206,7 +242,7 @@ class fibsem:
         Action: Connect AutoScript4 server
         '''
         microscope.connect()
-        return()
+
     def is_idle(self):
         '''
         Input: None
@@ -217,80 +253,175 @@ class fibsem:
         #    return(True)
         #else:
         #    return(False)
-        return()
+
     def get_current(self):
         '''
         Input: None
         Output: Returns the current ion beam current as float
         Action: None
         '''
-        current=microscope.beams.ion_beam.get_current()
-        #print('Hello')
-        #try:
-        #    return(float(microscope.beams.ion_beam.beam_current.value))
-        #except:
-        #    print("No microscope connected.")
-        return(current)
-    def take_image_IB(self,settings=None):
+        try:
+            return(float(microscope.beams.ion_beam.beam_current.value))
+        except:
+            print("No microscope connected.")
+
+    def insert_GIS(self):
+        '''
+        Input: None
+        Output: None
+        Action: Insert GIS Needle. Initialize if needed.
+        '''
+        if self.GIS==None:
+            #port_list=microscope.gas.get_gis_port('Pt dep')
+            
+            #self.GIS=port_list['Pt dep']
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+        #microscope.
+        else:
+            print('GIS has been initialized previously.')
+        self.GIS.insert()
+        return()
+
+    def retract_GIS(self):
+        '''
+        Input: None
+        Output: None
+        Action: Retract GIS Needle. Initialize if needed.
+        '''
+        if self.GIS==None:
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+            #self.GIS=port_list['Pt dep']
+        #microscope.
+        else:
+            print('GIS has been initialized previously.')
+        self.GIS.retract()
+        return()
+    
+    def open_GIS(self,runtime):
+        #start_time=time.time()
+        #current_time=time.time()
+        #diff=current_time-start_time
+        #while diff<runtime:
+        #    print(diff)
+        #    diff=current_time-start_time
+        #    current_time=time.time()
+        if self.GIS==None:
+            self.GIS=microscope.gas.get_gis_port('Pt dep')
+        else:
+            print('GIS has been initialized previously.')
+        
+        
+        self.GIS.turn_heater_on()
+        time.sleep(10)
+        
+        
+        self.GIS.open()
+        x=time.time()
+        while True:
+            y=time.time()
+            if float(y)-float(x) < runtime:
+                time.sleep(0.5)  # sec
+                print(float(y)-float(x))
+            else:
+                self.GIS.close()
+                self.GIS.turn_heater_off()
+                print('Sample has been GISed for '+str(runtime)+' seconds.')
+                return()
+    def ion_on(self):
+        microscope.beams.ion_beam.turn_on()
+        return()
+    def electron_on(self):
+        microscope.beams.electron_beam.turn_on()
+        return()
+    
+    def setIonHFW(self,value=104):
+        microscope.beams.ion_beam.horizontal_field_width.value=value*1e-06
+        return()
+    def link_stage(self):
+        microscope.specimen.stage.link()
+        return()
+    def unlink_stage(self):
+        microscope.specimen.stage.unlink()
+        return()
+    def take_image_IB(self):
         '''
         Input: None
         Output: AdornedImage
         Action: Take IB image with standard parameters
         '''
-        
-        #return(img)
-        #self.connect()
-        if settings==None:
-            settings=GrabFrameSettings(dwell_time=10e-08,resolution='1024x768',line_integration=1)
-        else:
-            print("Other imaging settings than standard given")
-        time.sleep(1)
-        microscope.beams.change_beam('ION')
-        time.sleep(1)
-        microscope.imaging.grab_frame(settings)
-        #self.disconnect()
-        #path=r'D:/Images/RoSa/Images/test.tif'
-        #image_output=r'c:/Users/Sven/Pictures/test.tif'
-        path=self.APIpath
-        #time.sleep(1)
-        img=cv2.imread(path)
-        #print(img)
-        image=DummyAdorned()
-        image.data=img
-
-        
-
-        from src.Zeiss.tiff_handle import read_tiff
-        try:
-            img, pix = read_tiff(path)
-            print(img,pix)
-            image_pixel_size=pix
-            #image_pixel_size = get_tiff_info(path)["AP_IMAGE_PIXEL_SIZE"].split()
-
-            image.metadata.binary_result.pixel_size=Point(image_pixel_size,image_pixel_size)
-        except AttributeError:
-            print('Testversion without CrossBeam connected is running, pixel sizes are going to be off.')
-            image.metadata.binary_result.pixel_size=Point(1e-09,1e-09)
-        #tilt_angle = tiff_handle.get_tiff_info(self.fname)["AP_STAGE_AT_T"].split()
-        #self.angle = float(tilt_angle[0])
-        #if image_pixel_size[1] == "nm": self.pix = float(image_pixel_size[0])*1e-9
-        #elif image_pixel_size[1] == "µm": self.pix = float(image_pixel_size[0])*1e-6
-        
+        #try:
+        # # Set view to electron beam
+        # microscope.imaging.set_active_view(2)
 
 
-        #if image.data.shape[2]==3:
-        #    image.data=image.data[:,:,2]
-        #else:
-        #    print('8bit image')
-        #print(image)
-        return(image)
+        # #Check if EB is on, Turn on EB if not the case
+        # if microscope.beams.ion_beam.is_blanked:
+        #     print("Ion beam blanked ")
+        #     microscope.beams.ion_beam.turn_on()
+        # else:
+        #     print("Ion beam turned on")
+            
+
+
+
+        # # Aquire Snapshot in EB window
+        # print("Acquiring IB snapshot")
+        # framesettings = GrabFrameSettings(bit_depth=8)
+        # img = microscope.imaging.grab_frame(framesettings)
+        # array = img.data
+
+
+        imageWidth = 1024
+        imageHeight = 1024
+        # for simultaneous acquisition from multiple channels, we use this way of acquisition
+        channel=0
+        channel1=6
+        #channel2=
+        images = self.tescanScope.FIB.Scan.AcquireImagesFromChannels((channel,channel1), imageWidth, imageHeight, 320)
+        print(images[0])
+
+        image=np.array(images[1].Image)
+        img=DummyAdorned()
+        img.data=image
+        pixel_size=images[1].Header['MAIN']['PixelSizeX']
+        img.metadata.binary_result.pixel_size=Point(pixel_size,pixel_size)
+        print(images[1].Header.OPTCRE)
+        #microscope.beams.electron_beam.turn_off()
+        #print("Electron beam turned off")
+        return(img)
+        #except:
+        #    print("ERROR: No Microscope connected")
+        #return()
     def take_image_EB(self):
         '''
         Input: None
         Output: Image as numpy array
         Action: Take EB image with standard parameters
         '''
-        #return(img)
+        try:
+            # Set view to electron beam
+            # microscope.imaging.set_active_view(1)
+
+
+            # #Check if EB is on, Turn on EB if not the case
+            # if microscope.beams.electron_beam.is_blanked:
+            #     print("Ion beam blanked ")
+            # else:
+            #     print("Electron beam turned on")
+            #     microscope.beams.electron_beam.turn_on()
+
+
+
+            # # Aquire Snapshot in EB window
+            # print("Acquiring EB snapshot")
+            # img = microscope.imaging.grab_frame()
+
+            array = img.data
+
+
+            return(img)
+        except:
+            print("ERROR: No Microscope connected")
         return()
 
     def take_image_EB_SAV(self):
@@ -300,16 +431,16 @@ class fibsem:
         Action: Take EB image with defined parameters from SAVparamsfile
         '''
 
-        #try:
+        try:
             # Set view to electron beam
-            #microscope.imaging.set_active_view(1)
+            microscope.imaging.set_active_view(1)
 
             # Read parameters from defined SAVparams file
-        paramsfile=self.SAVparamsfile
-        params = read_SAV_params(paramsfile)
-        res=params['Resolution']
-        dwell=float(params['DwellTime'])
-        LI=int(params['LineIntegration'])
+            paramsfile=self.SAVparamsfile
+            params = read_SAV_params(paramsfile)
+            res=params['Resolution']
+            dwell=float(params['DwellTime'])
+            LI=int(params['LineIntegration'])
 
 
 
@@ -317,12 +448,15 @@ class fibsem:
 
 
             # Aquire Snapshot in EB window
-        print("Acquiring EB snapshot")
-            #images = microscope.imaging.grab_multiple_frames(GrabFrameSettings(dwell_time=dwell,resolution=res,line_integration=LI))
-            #array = images[0].data
+            print("Acquiring EB snapshot")
+            images = microscope.imaging.grab_multiple_frames(GrabFrameSettings(dwell_time=dwell,resolution=res,line_integration=LI))
+            array = images[0].data
 
 
-        #return(images)
+            return(images)
+        except:
+            print("ERROR: No Microscope connected or no active detector in quadrants")
+            return()
 
     def getStagePosition(self):
         '''
@@ -332,27 +466,24 @@ class fibsem:
         '''
 
         #### Microscope dependent code ####
-        
         try:
-            #self.connect()
-            stageposition=microscope.specimen.stage.current_position
-            #self.disconnect()
+            stageposition=self.tescanScope.Stage.GetPosition()
+            print(stageposition)
             x=stageposition[0]
             y=stageposition[1]
             z=stageposition[2]
-            r=stageposition[4]
-            t=stageposition[3]
+            r=stageposition[3]
+            t=stageposition[4]
+            #stageposition=microscope.specimen.stage.current_position
         except:
-            #stageposition=StagePosition(x=0,y=0,z=0,r=0,t=0)
-            print('did not get stage position')
-            x=0#stageposition.x
-            y=0#stageposition.y
-            z=0#stageposition.z
-            r=0#stageposition.r
-            t=0#stageposition.t
-
+            stageposition=StagePosition(x=0,y=0,z=0,r=0,t=0)
+            x=0
+            y=0
+            z=0
+            r=0
+            t=0
         
-        print(stageposition)
+        
 
         #### Microscope independent code####
         stage_dict={'x':float(x),'y':float(y),'z':float(z),'r':float(r),'t':float(t)}
@@ -373,10 +504,10 @@ class fibsem:
         
 
         ### Microscope Dependent Code ###
-        stagepos=(x,y,z,t,r)
-        #self.connect()
-        microscope.specimen.stage.absolute_move(stagepos)
-        #self.disconnect()
+        #stagepos=StagePosition(x=x,y=y,z=z,t=t,r=r)
+        #microscope.specimen.stage.absolute_move(stagepos)
+        self.tescanScope.Stage.MoveTo(x,y,z,r,t)
+
         return()
     def moveStageRelative(self,stageposition):
         '''
@@ -384,105 +515,36 @@ class fibsem:
         Output: None
         Action: Move stage relative to previous position by given parameters
         '''
-        ### Microscope Independet Code ###
-        x=float(stageposition['x'])
-        y=float(stageposition['y'])
-        z=float(stageposition['z'])
-        r=float(stageposition['r'])
-        t=float(stageposition['t'])
+        ### Adaptation to missing TESCAN relative stage movement implementation ###
 
+        current_pos=self.getStagePosition()
+        x_curr=current_pos['x']
+        y_curr=current_pos['y']
+        z_curr=current_pos['z']
+        r_curr=current_pos['r']
+        t_curr=current_pos['t']
+
+        dx=float(stageposition['x'])
+        dy=float(stageposition['y'])
+        dz=float(stageposition['z'])
+        dr=float(stageposition['r'])
+        dt=float(stageposition['t'])
+
+        
+        x=x_curr+dx
+        y=y_curr+dy
+        z=z_curr+dz
+        r=r_curr+dr
+        t=t_curr+dt
         ### Microscope Dependent Code ###
         #stagepos=StagePosition(x=x,y=y,z=z,t=t,r=r)
         #microscope.specimen.stage.relative_move(stagepos)
-        stagepos=(x,y,z,t,r)
-        #self.connect()
-        microscope.specimen.stage.relative_move(stagepos)
-        #self.disconnect()
+        self.tescanScope.Stage.MoveTo(x,y,z,r,t)
         return("Stage Moved")
+    def print_stage_rot(self):
+        print(microscope.beams.ion_beam.scanning.rotation.value)
+        return None
 
-
-    def align_test(self,image,beam,current=1.0e-11):
-        print('Running alignment')
-        microscope.imaging.set_active_view(2)
-
-        ## Get old resolution of images to go back after alignment
-        old_resolution=microscope.beams.ion_beam.scanning.resolution.value
-
-        print(old_resolution)
-        old_mag=microscope.beams.ion_beam.horizontal_field_width.value
-        print(old_mag)
-        self.test_mag(image)
-        ## Get resolution of reference image and set microscope to given HFW
-        img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
-        
-        microscope.beams.ion_beam.scanning.resolution.value=img_resolution
-
-        microscope.beams.ion_beam.scanning.resolution.value='512 * 384'
-        
-        microscope.beams.ion_beam.beam_current.value=current
-
-        ### COMMENTED FOR TESTING
-        #microscope.auto_functions.run_auto_cb()
-
-        microscope.beams.ion_beam.beam_shift.value=Point(0,0)
-        #print(image.data)
-        current_img=self.take_image_IB()
-        print(image.data)
-
-        # Load Matcher function and locate feature
-        favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
-        from src.Zeiss.LocateFeature import locate_feature
-        print(np.shape(current_img.data,image.data))
-        l = locate_feature(current_img, image, favourite_matcher)
-        #print(l.confidence)
-        #print(locate_feature)
-        
-        #beam_current_string=str(microscope.beams.ion_beam.beam_current.value)
-        move_count=0
-        while l.confidence < 0.98 and move_count < 3:
-            #self.log_output = self.log_output + "Move Count =" + str(move_count) + '\n'
-            x = l.center_in_meters.x * -1 # sign may need to be flipped depending on matcher
-            y = l.center_in_meters.y * -1
-            distance = np.sqrt(x ** 2 + y ** 2)
-            print("Deviation (in meters): " + str(distance))
-            #self.log_output = self.log_output + "Deviation (in meters): " + str(distance) + '\n'
-            
-            if distance > 1e-05:
-
-
-
-                #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
-                pos_cor={'x':x,'y':y,'z':0.0,'r':0.0,'t':0.0}
-                #microscope.specimen.stage.relative_move(pos_corr)
-                self.moveStageRelative(pos_cor)
-
-                #move_count += 1
-
-            else:
-                # apply (additional) beam shift
-                print("Shifting beam by ("+str(x)+","+str(y)+")...")
-                #self.log_output = self.log_output + "Shifting beam by ("+str(x)+","+str(y)+")... \n"
-                print(microscope.beams.ion_beam.beam_shift.value)
-                microscope.beams.ion_beam.beam_shift.value += Point(x,y) # incremental
-
-            current_img = self.take_image_IB()
-                #now = datetime.datetime.now()
-                #current_img.save(self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif')
-
-                #self.log_output = self.log_output + "Saved Image as : " +self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif'+'\n'
-            l = locate_feature(current_img, image, favourite_matcher)
-            move_count+=1
-        #microscope.beams.ion_beam.beam_shift.value = Point(0,0)
-
-
-        print("I made it here")
-    def test_mag(self,image):
-        img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
-        ### Added lines Heidelberg
-        img_pixelsize= image.metadata.binary_result.pixel_size.x
-        print(img_pixelsize*np.shape(image.data)[1])
-        microscope.imaging.set_field_width(float(img_pixelsize*np.shape(image.data)[1]))
-        return()
 
     def align(self,image,beam,current=1.0e-11):
         '''
@@ -491,314 +553,273 @@ class fibsem:
         Action: Align the stage and beam shift to the reference image at the current stage position
         '''
         current=self.alignment_current
+        
 
+        
+
+        
 
         try:
-            if beam=='ION':
-                print('Running alignment')
-                microscope.imaging.set_active_view(2)
-                self.test_mag(image)
+            #if beam=='ION':
+            print('Running alignment')
+            #microscope.imaging.set_active_view(2)
 
-                # Get old resolution of images to go back after alignment
-                old_resolution=microscope.beams.ion_beam.scanning.resolution.value
-                old_mag=microscope.beams.ion_beam.horizontal_field_width.value
-
-                # Get resolution of reference image and set microscope to given HFW
-                img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
-                
-                img_pixelsize= image.metadata.binary_result.pixel_size.x
-
-                dummy=self.take_image_IB()
-                microscope.imaging.set_field_width(float(img_pixelsize*np.shape(image.data)[1]))
-                
-                
-                
-                microscope.beams.ion_beam.scanning.resolution.value=img_resolution
-                microscope.beams.ion_beam.beam_current.value=current
-                time.sleep(2)
-                beam_current_string=str(microscope.beams.ion_beam.beam_current.value)
-
-                
-
-
-                # Get HFW from Image
-
-                # Run auto contrast brightness and reset beam shift. Take an image as reference for alignment
-                microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
-                #microscope.auto_functions.run_auto_cb()
-                self.auto_cb()
-                microscope.beams.ion_beam.beam_shift.value=Point(0,0)
-                current_img=self.take_image_IB()
+            # Get old resolution of images to go back after alignment
+            
+            ###
+            #old_resolution=microscope.beams.ion_beam.scanning.resolution.value
+            ###
+            
+            #old_resolution=self.tescanScope.
+            #old_mag=microscope.beams.ion_beam.horizontal_field_width.value
+            old_mag=self.tescanScope.FIB.Optics.GetViewfield()
+            print("old mag is "+str(old_mag))
+            # Get resolution of reference image and set microscope to given HFW
+            img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
+            
+            ###
+            #microscope.beams.ion_beam.scanning.resolution.value=img_resolution
+            ###
+            
+            #microscope.beams.ion_beam.beam_current.value=current
+            preset=get_closest_preset(30,current,self.probeTable)
+            self.tescanScope.FIB.Preset.Activate(preset)
+            beam_current_string=str(preset)
 
 
-                # Load Matcher function and locate feature
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
-                from src.Zeiss.LocateFeature import locate_feature
-                l = locate_feature(current_img, image, favourite_matcher)
-                print("Current confidence: " + str(l.confidence))
-                self.log_output=self.log_output+"Step Clarification: Initial Alignment after Stage move \n"
-                self.log_output=self.log_output+"Current confidence: " + str(l.confidence)+'\n'
+            # Get HFW from Image
+
+            # Run auto contrast brightness and reset beam shift. Take an image as reference for alignment
+            
+            ###
+            #microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
+            ###
+            
+            #self.tescanScope.FIB.Optics.SetViewfield(image.metadata.optics.scan_field_of_view.width)
+            #microscope.beams.ion_beam.horizontal_field_width.value =
+            #microscope.auto_functions.run_auto_cb()
+            detectors = self.tescanScope.FIB.Detector.Enum()
+            SE=detectors[2]
+            self.tescanScope.FIB.Detector.AutoSignal(SE)
+            #microscope.beams.ion_beam.beam_shift.value=Point(0,0)
+            self.tescanScope.FIB.Optics.SetImageShift(0,0)
+            current_img=self.take_image_IB()
 
 
-                # Start movements and log images
-                move_count = 0
-
-                now = datetime.datetime.now()
-                current_img.save(self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif')
-                self.log_output=self.log_output+"Saved Image as : "+self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif'+'\n'
-
-                # If cross correlation metric too low, continue movements for maximum 3 steps
-                while l.confidence < 0.98 and move_count < 3:
-                    self.log_output = self.log_output + "Move Count =" + str(move_count) + '\n'
-                    x = l.center_in_meters.x * -1 # sign may need to be flipped depending on matcher
-                    y = l.center_in_meters.y * -1
-                    distance = np.sqrt(x ** 2 + y ** 2)
-                    print("Deviation (in meters): " + str(distance))
-                    self.log_output = self.log_output + "Deviation (in meters): " + str(distance) + '\n'
+            # Load Matcher function and locate feature
+            favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+            #favourite_matcher = CustomCVMatcher('phase')
+            
+            l = locate_feature(current_img, image, favourite_matcher)
+            print("Current confidence: " + str(l.confidence))
+            self.log_output=self.log_output+"Step Clarification: Initial Alignment after Stage move \n"
+            self.log_output=self.log_output+"Current confidence: " + str(l.confidence)+'\n'
 
 
-                    # If distance, meaning offset between images low enough, stop.
-                    if distance < 82.9e-06/3072/2:
-                        break
-                    elif distance > 1e-05:
-                        # move stage and reset beam shift
-                        print("Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift...")
-                        self.log_output = self.log_output + "Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift... \n"
-                        rotation=microscope.beams.electron_beam.scanning.rotation.value
-                        possible_rotations=[0,3.14]
-                        #print(min(possible_rotations, key=lambda x: abs(x - rotation)))
+            # Start movements and log images
+            move_count = 0
 
-                        pos_cor={'x':x,'y':y,'z':0.0,'r':0.0,'t':0.0}
-                        #microscope.specimen.stage.relative_move(pos_corr)
-                        self.moveStageRelative(pos_cor)
-                        microscope.beams.ion_beam.beam_shift.value = Point(0,0)
+            now = datetime.datetime.now()
+            #current_img.save(self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif')
+            self.log_output=self.log_output+"Saved Image as : "+self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif'+'\n'
 
+            # If cross correlation metric too low, continue movements for maximum 3 steps
+            while l.confidence < 0.98 and move_count < 3:
+                self.log_output = self.log_output + "Move Count =" + str(move_count) + '\n'
+                x = l.center_in_meters.x * -1 # sign may need to be flipped depending on matcher
+                y = l.center_in_meters.y * -1
+                distance = np.sqrt(x ** 2 + y ** 2)
+                print("Deviation (in meters): " + str(distance))
+                self.log_output = self.log_output + "Deviation (in meters): " + str(distance) + '\n'
+
+
+                # If distance, meaning offset between images low enough, stop.
+                if distance < 82.9e-06/3072/2:
+                    break
+                elif distance > 1e-05:
+                    # move stage and reset beam shift
+                    print("Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift...")
+                    self.log_output = self.log_output + "Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift... \n"
+                    rotation=0
+                    #rotation=microscope.beams.ion_beam.scanning.rotation.value
+                    print(rotation)
+                    possible_rotations=[0,3.14]
+                    #print(min(possible_rotations, key=lambda x: abs(x - rotation)))
+
+                    if rotation==0:
+                        
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
+                        pos_corr={'x':float(x*1e03),'y':float(y*1e03),'z':0,'r':0,'t':0}
+                        print('Rotation is zero')
                     else:
-                        # apply (additional) beam shift
-                        print("Shifting beam by ("+str(x)+","+str(y)+")...")
-                        self.log_output = self.log_output + "Shifting beam by ("+str(x)+","+str(y)+")... \n"
-                        print(microscope.beams.ion_beam.beam_shift.value)
-                        microscope.beams.ion_beam.beam_shift.value += Point(x,y) # incremental
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
+                        pos_corr={'x':float(-x*1e03),'y':float(-y*1e03),'z':0,'r':0,'t':0}
+                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
+                        print('Rotation is NOT zero')
+                    #microscope.specimen.stage.relative_move(pos_corr)
+                    self.moveStageRelative(pos_corr)
+                    self.tescanScope.FIB.Optics.SetImageShift(0,0)
+                    #microscope.beams.ion_beam.beam_shift.value = Point(0,0)
 
-                    move_count += 1
+                else:
+                    # apply (additional) beam shift
+                    print("Shifting beam by ("+str(x)+","+str(y)+")...")
+                    self.log_output = self.log_output + "Shifting beam by ("+str(x)+","+str(y)+")... \n"
+                    #print(microscope.beams.ion_beam.beam_shift.value)
+                    old_shift=self.tescanScope.FIB.Optics.GetImageShift()
+                    ox=old_shift[0]
+                    oy=old_shift[1]
+                    new_x=ox+x
+                    new_y=oy+y
+                    new_shift=[new_x,new_y]
+                    self.tescanScope.FIB.Optics.SetImageShift(new_x,new_y)
+                    #microscope.beams.ion_beam.beam_shift.value += Point(x,y) # incremental
 
-                    current_img = self.take_image_IB()
-                    now = datetime.datetime.now()
-                    current_img.save(self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif')
+                move_count += 1
 
-                    self.log_output = self.log_output + "Saved Image as : " +self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif'+'\n'
-                    l = locate_feature(current_img, image, favourite_matcher)
-                    print("Current confidence: " + str(l.confidence))
-                    self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
-
-                # Go back to old resolution
-                microscope.beams.ion_beam.scanning.resolution.value = old_resolution
-                microscope.beams.ion_beam.horizontal_field_width.value = old_mag
-
-                self.alignment_img_buffer = current_img
-                print("Done.")
-
-
-
-            if beam=="ELECTRON":
-                # Same as above, just for alignment in SEM imaging
-                print('Running alignment')
-                microscope.imaging.set_active_view(1)
-                old_resolution = microscope.beams.electron_beam.scanning.resolution.value
-                old_mag = microscope.beams.electron_beam.horizontal_field_width.value
-
-                img_resolution = str(np.shape(image.data)[1]) + 'x' + str(np.shape(image.data)[0])
-                microscope.beams.electron_beam.scanning.resolution.value = img_resolution
-                microscope.beams.electron_beam.horizontal_field_width.value = image.metadata.optics.scan_field_of_view.width
-                microscope.beams.electron_beam.beam_shift.value = Point(0, 0)
-
-                current_img = self.take_image_EB()
-
-
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
-                l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
-                print("Current confidence: " + str(l.confidence))
-                move_count = 0
-
-                while l.confidence < 0.98 and move_count < 1:
-                    x = l.center_in_meters.x * -1  # sign may need to be flipped depending on matcher
-                    y = l.center_in_meters.y * -1
-                    distance = np.sqrt(x ** 2 + y ** 2)
-                    print("Deviation (in meters): " + str(distance))
-
-
-                    if distance > 1e-05:
-                        # move stage and reset beam shift
-                        print("Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift...")
-                        #self.log_output = self.log_output + "Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift... \n"
-
-                        rotation = microscope.beams.electron_beam.scanning.rotation.value
-                        possible_rotations = [0, 3.14]
-                        num=min(possible_rotations, key=lambda x: abs(x - rotation))
-                        print(num)
-                        if num==0:
-                            pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
-                        if num==3.14:
-                            pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
-                        microscope.specimen.stage.relative_move(pos_corr)
-                        microscope.beams.electron_beam.beam_shift.value = Point(0,0)
-
-                    else:
-                        # apply (additional) beam shift
-                        print("Shifting beam by ("+str(x)+","+str(y)+")")
-                        #self.log_output = self.log_output + "Shifting beam by ("+str(x)+","+str(y)+")... \n"
-                        print(microscope.beams.electron_beam.beam_shift.value)
-                        microscope.beams.electron_beam.beam_shift.value += Point(x,y) # incremental
-
-                    move_count += 1
-                    current_img = self.take_image_EB()
-                    l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
-                microscope.beams.electron_beam.scanning.resolution.value = old_resolution
-                microscope.beams.electron_beam.horizontal_field_width.value = old_mag
-                #self.alignment_img_buffer = current_img
-
-        except:
-            if beam == 'ION':
-                print('Running alignment')
-                microscope.imaging.set_active_view(2)
-                old_resolution = microscope.beams.ion_beam.scanning.resolution.value
-                old_mag = microscope.beams.ion_beam.horizontal_field_width.value
-                self.test_mag(image)
-
-                # microscope.beams.ion_beam.scanning.resolution.value='768x512'
-                img_resolution = str(np.shape(image.data)[1]) + 'x' + str(np.shape(image.data)[0])
-                microscope.beams.ion_beam.scanning.resolution.value = img_resolution
-                microscope.beams.ion_beam.beam_current.value = current
-                time.sleep(2)
-
-                # Get HFW from Image
-
-                microscope.beams.ion_beam.horizontal_field_width.value = image.metadata.optics.scan_field_of_view.width
-                #microscope.auto_functions.run_auto_cb()
-                self.auto_cb()
-                microscope.beams.ion_beam.beam_shift.value = Point(0, 0)
                 current_img = self.take_image_IB()
+                now = datetime.datetime.now()
+                #current_img.save(self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif')
 
-
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+                self.log_output = self.log_output + "Saved Image as : " +self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif'+'\n'
                 l = locate_feature(current_img, image, favourite_matcher)
                 print("Current confidence: " + str(l.confidence))
-
-                self.log_output = self.log_output + "Step Clarification: Initial Alignment after Stage move \n"
                 self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
 
-                move_count = 0
+            # Go back to old resolution
+            #microscope.beams.ion_beam.scanning.resolution.value = old_resolution
+            #microscope.beams.ion_beam.horizontal_field_width.value = old_mag
 
-                while l.confidence < 0.98 and move_count < 3:
-                    self.log_output = self.log_output + "Move Count =" + str(move_count) + '\n'
-                    x = l.center_in_meters.x * -1  # sign may need to be flipped depending on matcher
-                    y = l.center_in_meters.y * -1
-                    distance = np.sqrt(x ** 2 + y ** 2)
-                    print("Deviation (in meters): " + str(distance))
-                    self.log_output = self.log_output + "Deviation (in meters): " + str(distance) + '\n'
-
-                    if distance < 82.9e-06 / 3072 / 2:
-                        break
-                    elif distance > 1e-05:
-                        # move stage and reset beam shift
-                        print("Moving stage by (" + str(x) + "," + str(y) + ") and resetting beam shift...")
-                        self.log_output = self.log_output + "Moving stage by (" + str(x) + "," + str(
-                            y) + ") and resetting beam shift... \n"
-                        pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
-                        microscope.specimen.stage.relative_move(pos_corr)
-                        microscope.beams.ion_beam.beam_shift.value = Point(0, 0)
-
-                    else:
-                        # apply (additional) beam shift
-                        print("Shifting beam by (" + str(x) + "," + str(y) + ")...")
-                        self.log_output = self.log_output + "Shifting beam by (" + str(x) + "," + str(y) + ")... \n"
-                        print(microscope.beams.ion_beam.beam_shift.value)
-                        microscope.beams.ion_beam.beam_shift.value += Point(x, y)  # incremental
-
-                    move_count += 1
-
-                    current_img = self.take_image_IB()
-                    l = locate_feature(current_img, image, favourite_matcher)
-                    print("Current confidence: " + str(l.confidence))
-                    self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
-                microscope.beams.ion_beam.scanning.resolution.value = old_resolution
-                microscope.beams.ion_beam.horizontal_field_width.value = old_mag
-
-                print("Done.")
-
-            if beam=="ELECTRON":
-                #print("Not implemented yet")
-                print('Running alignment')
-                microscope.imaging.set_active_view(1)
-                old_resolution = microscope.beams.electron_beam.scanning.resolution.value
-                old_mag = microscope.beams.electron_beam.horizontal_field_width.value
-
-                img_resolution = str(np.shape(image.data)[1]) + 'x' + str(np.shape(image.data)[0])
-                microscope.beams.electron_beam.scanning.resolution.value = img_resolution
-                microscope.beams.electron_beam.horizontal_field_width.value = image.metadata.optics.scan_field_of_view.width
-                microscope.beams.electron_beam.beam_shift.value = Point(0, 0)
-
-                current_img = self.take_image_EB()
-
-                favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
-                l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
-                print("Current confidence: " + str(l.confidence))
-                move_count = 0
-
-                while l.confidence < 0.98 and move_count < 1:
-                    x = l.center_in_meters.x * -1  # sign may need to be flipped depending on matcher
-                    y = l.center_in_meters.y * -1
-                    distance = np.sqrt(x ** 2 + y ** 2)
-                    print("Deviation (in meters): " + str(distance))
+            self.alignment_img_buffer = current_img
+            print("Done.")
+        except:
+            print('Alignment failed.')
 
 
-                    if distance > 1e-05:
-                        # move stage and reset beam shift
-                        print("Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift...")
-                        #self.log_output = self.log_output + "Moving stage by ("+str(x)+","+str(y)+") and resetting beam shift... \n"
-                        #pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
-                        if num==0:
-                            pos_corr = StagePosition(coordinate_system='Specimen', x=-x, y=-y)
-                        if num==3.14:
-                            pos_corr = StagePosition(coordinate_system='Specimen', x=x, y=y)
-                        microscope.specimen.stage.relative_move(pos_corr)
-                        microscope.beams.electron_beam.beam_shift.value = Point(0,0)
-
-                    else:
-                        # apply (additional) beam shift
-                        print("Shifting beam by ("+str(x)+","+str(y)+")...")
-                        #self.log_output = self.log_output + "Shifting beam by ("+str(x)+","+str(y)+")... \n"
-                        print(microscope.beams.electron_beam.beam_shift.value)
-                        microscope.beams.electron_beam.beam_shift.value += Point(x,y) # incremental
-                        if num==0:
-                            microscope.beams.electron_beam.beam_shift.value += Point(-x, -y)  # incremental
-                        if num==3.14:
-                            microscope.beams.electron_beam.beam_shift.value += Point(x, y)  # incremental
-
-                    move_count += 1
-                    current_img = self.take_image_EB()
-                    l = vision_toolkit.locate_feature(current_img, image, favourite_matcher)
-                microscope.beams.electron_beam.scanning.resolution.value = old_resolution
-                microscope.beams.electron_beam.horizontal_field_width.value = old_mag
-
-        return()
-
-    def align_current_test(self,new_current):
-        print(new_current)
-        microscope.beams.ion_beam.beam_current.value = new_current
-        print(microscope.beams.ion_beam.beam_current.value)
     def align_current(self,new_current,beam='ION'):
+        ref_img=self.take_image_IB()
+        image=ref_img
+        #try:
+        #if beam=='ION':
+        print('Running alignment')
+        #microscope.imaging.set_active_view(2)
+
+        # Get old resolution of images to go back after alignment
+        
+        ###
+        #old_resolution=microscope.beams.ion_beam.scanning.resolution.value
+        ###
+        
+        #old_resolution=self.tescanScope.
+        #old_mag=microscope.beams.ion_beam.horizontal_field_width.value
+        old_mag=self.tescanScope.FIB.Optics.GetViewfield()
+        print("old mag is "+str(old_mag))
+        # Get resolution of reference image and set microscope to given HFW
+        img_resolution=str(np.shape(image.data)[1])+'x'+str(np.shape(image.data)[0])
+        
+        ###
+        #microscope.beams.ion_beam.scanning.resolution.value=img_resolution
+        ###
+        
+        #microscope.beams.ion_beam.beam_current.value=current
+        preset=get_closest_preset(30,new_current,self.probeTable)
+        self.tescanScope.FIB.Preset.Activate(preset)
+        beam_current_string=str(preset)
+
+
+        # Get HFW from Image
+
+        # Run auto contrast brightness and reset beam shift. Take an image as reference for alignment
+        
+        ###
+        #microscope.beams.ion_beam.horizontal_field_width.value=image.metadata.optics.scan_field_of_view.width
+        ###
+        
+        #self.tescanScope.FIB.Optics.SetViewfield(image.metadata.optics.scan_field_of_view.width)
+        #microscope.beams.ion_beam.horizontal_field_width.value =
+        #microscope.auto_functions.run_auto_cb()
+        detectors = self.tescanScope.FIB.Detector.Enum()
+        SE=detectors[2]
+        self.tescanScope.FIB.Detector.AutoSignal(SE)
+        #microscope.beams.ion_beam.beam_shift.value=Point(0,0)
+        self.tescanScope.FIB.Optics.SetImageShift(0,0)
+        current_img=self.take_image_IB()
+
+
+        # Load Matcher function and locate feature
+        favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
+        #favourite_matcher = CustomCVMatcher('phase')
+        
+        l = locate_feature(current_img, image, favourite_matcher)
+        print("Current confidence: " + str(l.confidence))
+        self.log_output=self.log_output+"Step Clarification: Initial Alignment after Stage move \n"
+        self.log_output=self.log_output+"Current confidence: " + str(l.confidence)+'\n'
+
+
+        # Start movements and log images
+        move_count = 0
+
+        now = datetime.datetime.now()
+        #current_img.save(self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif')
+        self.log_output=self.log_output+"Saved Image as : "+self.output_dir + self.lamella_name+'_out/'+now.strftime("%Y-%m-%d_%H_%M_%S_")+self.lamella_name +'_'+ beam_current_string + '_first_move_'+str(move_count)+'.tif'+'\n'
+
+        # If cross correlation metric too low, continue movements for maximum 3 steps
+        while l.confidence < 0.98 and move_count < 3:
+            self.log_output = self.log_output + "Move Count =" + str(move_count) + '\n'
+            x = l.center_in_meters.x * -1 # sign may need to be flipped depending on matcher
+            y = l.center_in_meters.y * -1
+            distance = np.sqrt(x ** 2 + y ** 2)
+            print("Deviation (in meters): " + str(distance))
+            self.log_output = self.log_output + "Deviation (in meters): " + str(distance) + '\n'
+
+
+            # If distance, meaning offset between images low enough, stop.
+            if distance < 82.9e-06/3072/2:
+                break
+            else:
+                # apply (additional) beam shift
+                print("Shifting beam by ("+str(x)+","+str(y)+")...")
+                self.log_output = self.log_output + "Shifting beam by ("+str(x)+","+str(y)+")... \n"
+                #print(microscope.beams.ion_beam.beam_shift.value)
+                old_shift=self.tescanScope.FIB.Optics.GetImageShift()
+                ox=old_shift[0]
+                oy=old_shift[1]
+                new_x=ox+x
+                new_y=oy+y
+                new_shift=[new_x,new_y]
+                self.tescanScope.FIB.Optics.SetImageShift(new_x,new_y)
+                #microscope.beams.ion_beam.beam_shift.value += Point(x,y) # incremental
+
+            move_count += 1
+
+            current_img = self.take_image_IB()
+            now = datetime.datetime.now()
+            #current_img.save(self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif')
+
+            self.log_output = self.log_output + "Saved Image as : " +self.output_dir+ self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_") + self.lamella_name +'_'+ beam_current_string + '_first_move_' + str(move_count)+'.tif'+'\n'
+            l = locate_feature(current_img, image, favourite_matcher)
+            print("Current confidence: " + str(l.confidence))
+            self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
+
+        # Go back to old resolution
+        #microscope.beams.ion_beam.scanning.resolution.value = old_resolution
+        #microscope.beams.ion_beam.horizontal_field_width.value = old_mag
+
+        self.alignment_img_buffer = current_img
+        print("Done.")
+        #except:
+        #    print("Aligning current failed.")
+        return()
+    def align_current_old(self,new_current,beam='ION'):
         '''
         Input: Current to change towards, beam (currently "ION" only)
         Output: None
         Action: Take a reference image at the old current, change current and align to that reference image
         '''
-        from src.Zeiss.LocateFeature import locate_feature
         if beam=="ION":
-            #microscope.imaging.set_active_view(2)
+            microscope.imaging.set_active_view(2)
             #pos1=microscope.specimen.stage.current_position
-            #microscope.auto_functions.run_auto_cb()
-            #self.auto_cb()
+            microscope.auto_functions.run_auto_cb()
             beam_current_string = str(microscope.beams.ion_beam.beam_current.value)
             ref_img=self.take_image_IB()
             now = datetime.datetime.now()
@@ -808,12 +829,10 @@ class fibsem:
             except:
                 print("Run in Scripting Mode")
             microscope.beams.ion_beam.beam_current.value = new_current
-            time.sleep(5)
             microscope.beams.ion_beam.scanning.dwell_time.value=200e-09
             microscope.beams.ion_beam.scanning.resolution.value = '768x512'
-            #microscope.auto_functions.run_auto_cb()
-            self.auto_cb()
-            current_img=self.take_image_IB()
+            microscope.auto_functions.run_auto_cb()
+            current_img=microscope.imaging.grab_frame()
 
 
             move_count = 0
@@ -825,7 +844,7 @@ class fibsem:
                 pass
 
             favourite_matcher = CustomCVMatcher(cv2.TM_CCOEFF_NORMED, tiling=False)
-            l = locate_feature(current_img, ref_img, favourite_matcher)
+            l = vision_toolkit.locate_feature(current_img, ref_img, favourite_matcher)
             
             print("Current confidence: " + str(l.confidence))
 
@@ -856,15 +875,15 @@ class fibsem:
                         self.log_output = self.log_output + "Saved Image as : " + self.output_dir + self.lamella_name + '_out/' +now.strftime("%Y-%m-%d_%H_%M_%S_")+ self.lamella_name + '_'+ beam_current_string + '_align_current_' + str(move_count)+'.tif'+'\n'
                     except:
                         pass
-                    l = locate_feature(current_img, ref_img, favourite_matcher)
+                    l = vision_toolkit.locate_feature(current_img, ref_img, favourite_matcher)
                     print("Current confidence: " + str(l.confidence))
                     self.log_output = self.log_output + "Current confidence: " + str(l.confidence) + '\n'
                 else:
                     print("Distance is greater than 10 microns. Abort.")
                     self.log_output = self.log_output + "Distance is greater than 10 microns. Abort.\n"
                     break
-            #microscope.auto_functions.run_auto_cb()
-            #self.auto_cb()
+            microscope.auto_functions.run_auto_cb()
+
 
 
         return()
@@ -887,7 +906,19 @@ class fibsem:
         return()
 
 
-    def create_pattern(self,x,y,h,w,d=10e-06):
+    def printProgressBar(self,value, total, prefix='', suffix='', decimals=0, length=100, fill='█'):
+        """
+        terminal progress bar
+        """
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (value / float(total)))
+        filled_length = int(length * value // total)
+        bar = fill * filled_length + '-' * (length - filled_length)
+        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end="")
+        return
+
+
+
+    def create_pattern(self,x,y,h,w,d=100e-06):
         '''
         Input: Center in X,Y of the pattern; Width(w), Height(h), and optionally Depth (d) of the Pattern
         Output: Pattern as AutoScript4 object
@@ -900,35 +931,42 @@ class fibsem:
         inp_height=h
         inp_width=w
 
-        #Set viewport of microscope#
-        #microscope.imaging.set_active_view(2)
 
-        #create pattern
-        #pattern=microscope.patterning.create_rectangle(center_x=inp_center_x, center_y=inp_center_y,depth=inp_depth,height=inp_height,width=inp_width)
+        # syncWriteField Size = Grab HFW from UI
+        # WriteField Size ==> HFW and should be grabbed from image 
+        # Current 
+        # 
+        beamCurrent=self.tescanScope.FIB.Beam.ReadProbeCurrent()
+        print(beamCurrent)
+
+        layerSettings = IEtching(False, 85e-6, 10e-9, 50e-9, 4.7e-10, 1e-6, DBAccuracy.Fine, 1, True)
+        label='Pattern'
+        layer = Layer(label, layerSettings)
+        layer.addRectangleStairs(x, y, d, w, h, 0, DBDepthUnit.Meter, 1, 1, ScanningPath.ZigZag)
+        self.tescanScope.DrawBeam.LoadLayer(layer)
+        self.tescanScope.DrawBeam.Start()
+        while True:
+            status = self.tescanScope.DrawBeam.GetStatus()
+            running = status[0] == DBStatus.ProjectLoadedExpositionInProgress or status[0] == DBStatus.ProjectLoadedExpositionPaused
+            
+
+            if running:
+                progress = 0
+                if status[1] > 0:
+                    progress = min(100, status[2] / status[1] * 100)
+                self.printProgressBar(progress, 100)
+                self.tescanScope.Progress.SetPercents(progress)
+                time.sleep(1)
+            else:
+                if status[0] == DBStatus.ProjectLoadedExpositionIdle:
+                    self.printProgressBar(100, 100, suffix='Finished')
+                    print('')
+                break
+        #self.tescanScope.DrawBeam.UnloadLayer()
         
-        #pattern=''
-        pattern=DummyPattern()
-        pattern.x=x
-        pattern.y=y
-        pattern.width=w
-        pattern.height=h
-        pattern.depth=d
-        return(pattern)
-
-    def test_pattern(self,fname=r'D:/Images/RoSa/SerialFIB/Bla/Bla/0_out/0_step_0_pattern_1.ptf'):
-        print(fname)
-        print('CHANGING TO ION BEAM TO PREPARE PATTERNING')
-        microscope.beams.change_beam('ION')
-        #x=0
-        microscope._patterning.load_pattern(fname,testing=self.testing)
-        while not microscope._patterning.is_idle:
-            time.sleep(0.3)
-            #print(x)
-            #time.sleep(1)
-        #
-        #print(dir(microscope._patterning))
-        time.sleep(1)
-        microscope.beams.change_beam('ION')
+        
+        #microscope.imaging.set_active_view(2)
+        #pattern=microscope.patterning.create_rectangle(center_x=inp_center_x, center_y=inp_center_y,depth=inp_depth,height=inp_height,width=inp_width)
         return()
 
     def pattern_parser(self,directory,filename):
@@ -937,35 +975,63 @@ class fibsem:
         Output: Pattern as AutoScript4 object
         Action: Draws pattern from file in xT GUI
         '''
-        #import pattern Zeiss specific here
-        pattern=DummyPattern()
-        #pattern.center_x=0.0
-        #pattern.center_y=0.0
-        #pattern.width=0.0
-        #pattern.height=0.0
-        #pattern.depth=10.0e-06
-
-        #dummy_pattern=r'c:/Users/Sven/Desktop/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely'
-        tree = ET.parse(os.path.join(directory+filename))
+        tree = ET.parse(directory+filename)
         root = tree.getroot()
+        for element in root:
+            print(element.tag)
+            if element.tag=='Settings':
+                print("bla")
+        # for element in root:
+        #     if element.tag == 'PatternRectangle':
+        #         inp_pattern_type='Rectangle'
+        #         inp_center_x = float(element.find('CenterX').text)
+        #         inp_center_y = float(element.find('CenterY').text)
+        #         inp_depth = float(element.find('Depth').text)
+        #         inp_height = float(element.find('Length').text)
+        #         inp_width = float(element.find('Width').text)
+        #         inp_scan_direction = str(element.find('ScanDirection').text)
+        #         inp_dwell_time=float(element.find('DwellTime').text)
 
-        for i in root.iter('RECT'):
-            center_x=float(i.attrib['x'])
-            center_y=float(i.attrib['y'])
-            height=float(i.attrib['height'])
-            width=float(i.attrib['width'])
-            print(center_x,center_y,height,width)
-        
-        pattern.center_x=center_x*1e-06
-        pattern.center_y=center_y*1e-06
-        pattern.width=width*1e-06
-        pattern.height=height*1e-06
-        pattern.depth=10.0e-06
-        #raise SystemExit
-        print(center_x,center_y,height,width)
-        #try:
-        #tree.write(directory+filename)
-        return(pattern)
+        #     if element.tag == 'PatternRegularCrossSection':
+        #         inp_pattern_type='RegularCrossSection'
+        #         inp_center_x = float(element.find('CenterX').text)
+        #         inp_center_y = float(element.find('CenterY').text)
+        #         inp_depth = float(element.find('Depth').text)
+        #         inp_height = float(element.find('Length').text)
+        #         inp_width = float(element.find('Width').text)
+        #         inp_scan_direction = str(element.find('ScanDirection').text)
+        #         inp_dwell_time=float(element.find('DwellTime').text)
+
+        #     if element.tag == 'PatternCleaningCrossSection':
+        #         inp_pattern_type='CleaningCrossSection'
+        #         inp_center_x = float(element.find('CenterX').text)
+        #         inp_center_y = float(element.find('CenterY').text)
+        #         inp_depth = float(element.find('Depth').text)
+        #         inp_height = float(element.find('Length').text)
+        #         inp_width = float(element.find('Width').text)
+        #         inp_scan_direction = str(element.find('ScanDirection').text)
+        #         inp_dwell_time=float(element.find('DwellTime').text)
+
+        # if inp_pattern_type=='Rectangle':
+        #     pattern=microscope.patterning.create_rectangle(center_x=inp_center_x, center_y=inp_center_y,depth=inp_depth,height=inp_height,width=inp_width)
+        # elif inp_pattern_type=='CleaningCrossSection':
+        #     pattern = microscope.patterning.create_cleaning_cross_section(center_x=inp_center_x, center_y=inp_center_y, depth=inp_depth, height=inp_height, width=inp_width)
+        # elif inp_pattern_type=='RegularCrossSection':
+        #     pattern=microscope.patterning.create_regular_cross_section(center_x=inp_center_x, center_y=inp_center_y, depth=inp_depth, height=inp_height, width=inp_width)
+
+
+        # pattern.dwell_time=inp_dwell_time
+        # if inp_scan_direction=='BottomToTop':
+        #     pattern.scan_direction = PatternScanDirection.BOTTOM_TO_TOP
+        # elif inp_scan_direction=='TopToBottom':
+        #     pattern.scan_direction = PatternScanDirection.TOP_TO_BOTTOM
+        # elif inp_scan_direction=='LeftToRight':
+        #     pattern.scan_direction = PatternScanDirection.LEFT_TO_RIGHT
+        # elif inp_scan_direction=='RightToLeft':
+        #     pattern.scan_direction = PatternScanDirection.RIGHT_TO_LEFT
+        # else:
+        #     print("!!! CATION !!! \n Could not recognize ScanDirection of pattern \n !!! CAUTION !!!")
+        # return(pattern)
     def pattern_directory_parser(self,directory):
         '''
         Input: Directory path as string
@@ -991,103 +1057,67 @@ class fibsem:
                 rectangle_list.update({filename[:-4]:rectangle})
         return(rectangle_list)
 
-    def save_pattern(self,directory,filename,pattern,current=1e-011, time=10):
+    def save_pattern(self,directory,filename,Pattern):
+
+        CenterX=Pattern.center_x
+        CenterY=Pattern.center_y
+        Depth=Pattern.depth
+        Length=Pattern.height
+        Width=Pattern.width
+        ScanDirection=Pattern.scan_direction
+
+        layerSettings = IEtching(False, 85e-6, 10e-9, 50e-9, 4.7e-10, 1e-6, DBAccuracy.Fine, 1, True)
+        label1='Pattern'
+        layer = Layer(label1, layerSettings)
+        d=1e-06
+        layer.addRectangleStairs(CenterX, CenterY, Depth, Width, Length, 0, DBDepthUnit.Meter, 1, 1, ScanningPath.ZigZag)
+        print(layer,file=open(directory+filename,'w'))
+        return()
+
+
+    def save_pattern_old(self,directory,filename,Pattern):
         '''
         Input: Directory path as string, output filename as string, Pattern as AutoScript4 Pattern object
         Output: None
         Action: Writes pattern as xT xml given the AutoScript Pattern object's parameters
         '''
-        # scan_type=Pattern.__class__.__name__
-        # if scan_type=="CleaningCrossSectionPattern":
-        #     name_tag='Pattern'+scan_type[:-7]
-        #     dummy_pattern=r"./TemplatePatterns/clean_cross.ptf"
-        # elif scan_type=="RegularCrossSectionPattern":
-        #     name_tag='Pattern'+scan_type[:-7]
-        #     dummy_pattern=r"./TemplatePatterns/cross.ptf"
-        # else:
-        #     name_tag="PatternRectangle"
-        #     dummy_pattern=r"./TemplatePatterns/regular.ptf"
+        scan_type=Pattern.__class__.__name__
+        if scan_type=="CleaningCrossSectionPattern":
+            name_tag='Pattern'+scan_type[:-7]
+            dummy_pattern=r"./TemplatePatterns/clean_cross.ptf"
+        elif scan_type=="RegularCrossSectionPattern":
+            name_tag='Pattern'+scan_type[:-7]
+            dummy_pattern=r"./TemplatePatterns/cross.ptf"
+        else:
+            name_tag="PatternRectangle"
+            dummy_pattern=r"./TemplatePatterns/regular.ptf"
 
 
-        # tree = ET.parse(dummy_pattern)
-        # root = tree.getroot()
-
-        # CenterX=Pattern.center_x
-        # CenterY=Pattern.center_y
-        # Depth=Pattern.depth
-        # Length=Pattern.height
-        # Width=Pattern.width
-        # ScanDirection=Pattern.scan_direction
-        
-        # for element in root:
-        #     if element.tag == name_tag:
-        #         element.find('CenterX').text=str(CenterX)
-        #         element.find('CenterY').text=str(CenterY)
-        #         print(Depth)
-        #         element.find('Depth').text=str(Depth)
-        #         element.find('Length').text=str(Length)
-        #         element.find('Width').text=str(Width)
-        #         element.find('ScanDirection').text=str(ScanDirection)
-
-        #dummy_pattern=r'c:/Users/Sven/Desktop/GitHub/SerialFIB/TemplatePatterns/Zeiss/layout001.ely'
-        dummy_pattern=self.dummy_pattern
         tree = ET.parse(dummy_pattern)
         root = tree.getroot()
-        #mill_time-time
 
-        from src.Zeiss.read_probe_table import getProbe
-        params=getProbe(current,self.probe_table)
-
-        from src.Zeiss.caculate_mill_time_fct import calculate_dwell_time
+        CenterX=Pattern.center_x
+        CenterY=Pattern.center_y
+        Depth=Pattern.depth
+        Length=Pattern.height
+        Width=Pattern.width
+        ScanDirection=Pattern.scan_direction
         
-        #print("THE CURRENT IS",current)
-        for i in root.iter('RECT'):
-            i.attrib['x']=str(pattern.x*1e06)
-            i.attrib['y']=str(pattern.y*1e06)
-            i.attrib['height']=str(pattern.height*1e06)
-            i.attrib['width']=str(pattern.width*1e06)
-            height=pattern.height
-            width=pattern.width
+        for element in root:
+            if element.tag == name_tag:
+                element.find('CenterX').text=str(CenterX)
+                element.find('CenterY').text=str(CenterY)
+                print(Depth)
+                element.find('Depth').text=str(Depth)
+                element.find('Length').text=str(Length)
+                element.find('Width').text=str(Width)
+                element.find('ScanDirection').text=str(ScanDirection)
+        try:
+            tree.write(directory+filename)
+        except:
+            print("Files already exist! Please check InputDir")
 
-            for j in i.iter('PROBE'):
-                j.attrib['name']=params['name']
-                j.attrib['current']=params['current'] + " A"
-                j.attrib['diameter']=params['diameter']+" m"
-            for k in i.iter('EXPOSURE'):
-                pixel_spacing=float(int(k.attrib['pixel_spacing_area'].split(' ')[0])/100)
-                track_spacing=float(int(k.attrib['track_spacing'].split(' ')[0])/100)
-                dose=float(k.attrib['dose_area'].split(' ')[0])
 
-                cycle=6125
-                probe_current=float(params['current'])
-                probe_size=float(params['diameter'])
-                
-
-            #mill_time=calculate_mill_time(params['current'],params['diameter'],params['pixel_spacing_area'],params['track_spacing'],params['dose_area'],cycle=params['']
-           
-                dose=calculate_dwell_time(probe_current,probe_size,pixel_spacing,track_spacing,dose,cycle,time,width,height)
-                k.attrib['dose_area']=str(np.absolute(dose))+str(" C/m²")
-                print(str(dose)+str(" C/m&#178;"))
-
-            #j.attrib['name']="30kV:50pA ref"
-            #j.attrib['current']="5e-011 A"
-            #j.attrib['diameter']="4.5e-008 m"
-                #print(dwell_time)
-                #k.attrib['dwell_times_area']=str(dwell_time)+" s"
-
-        #try:
-        #print("Probe_current is:",probe_current)
-        #print("Track_Spacing is:",track_spacing)
-        #print("Pixel spacing is:",pixel_spacing)
-        #print("Dose is:",dose)
-        #print("Cycle:",cycle)
-        #print("Time is:",time)
-        #print("Width is:",width)
-        #print("height: ", height)
-        #print(probe_current,probe_size,pixel_spacing,track_spacing,dose,cycle,time,width,height)
-        tree.write(directory+filename)
-        #except:
-        #    print("Files already exist! Please check InputDir")
 
         return()
 
@@ -1097,69 +1127,87 @@ class fibsem:
         Output: None
         Action: runs auto contrast brightness
         '''
-        #microscope.auto_functions.run_auto_cb()
-        
-        print('Insert AutoCB function here')
-        contrast_values=[10,20,30,40,50]
-        #
-        print('Beam current is:')
-        #print(microscope._beams.ion_beam.beam_current.value)
-        settings=GrabFrameSettings(dwell_time=10e-08,resolution='512x384',line_integration=1)
-        current=self.get_current()
-        print(current)
-        if current < 500e-12:
-            contrast_values=[20,30,40,50,60,70,80,90,100]
-        if current > 500e-12:
-            contrast_values=[15,20,25,30,35,40,45,50,55,60,65,70,75,80]
-        contrast_list=[]
-        for value in contrast_values:
-            self.set_cb(value)
-            image1=self.take_image_IB(settings)
-            image1=image1.data
-            min=np.min(image1)
-            max=np.max(image1)
-            print(min)
-            print(max)
-            if max > 220:
-                break
-                #contrast = (max-min)/(max+min)
-                contrast = (max-min)
-                contrast_list.append(contrast)
-        
-        print(contrast_list)
-        #self.set_cb(40)
-        #image1=self.take_image_IB()
-        #data1=image1.data
-        #print(data1)
-        ##time.sleep(5)
-        #self.set_cb(30)
-        ##time.sleep(0.5)
-        #image2=self.take_image_IB()
-        #data2=image2.data
-        #print(data2)
-        
-        
-
-        return
-    
-  
-    def set_cb(self,contrast,brightness=50.1):
-        microscope.imaging.set_contrast(contrast)
-        microscope.imaging.set_brightness(brightness)
-        return
-
-
-
-    def run_milling_Zeiss(self,tp_filename,bp_filename,milling_time):
-        self.load_pattern(tp_filename)
-        self.load_pattern(bp_filename)
+        microscope.auto_functions.run_auto_cb()
         return()
+
+
+    def create_trench_patterns(self,directory,pattern_lamella,pattern_above,pattern_below):
+        '''
+        Input: Directory containing the user input from the SerialFIB GUI as xT patterns
+        Output: AutoScript4 "pattern" objects for trench milling
+        Action: None
+        '''
+        pattern_above = self.pattern_parser(directory, pattern_above)
+        start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+        pattern_below = self.pattern_parser(directory, pattern_below)
+        start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+        pattern_lamella = self.pattern_parser(directory, pattern_lamella)
+        lamella_center_x = pattern_lamella.center_x
+        lamella_center_y = pattern_lamella.center_y
+        width_lamella = pattern_lamella.width
+        top_center_y=pattern_above.center_y
+        bottom_center_y=pattern_below.center_y
+        height=abs(top_center_y-bottom_center_y)
+
+        left_trench_x=lamella_center_x+0.5*width_lamella+self.trench_offset
+        right_trench_x=lamella_center_x-(0.5*width_lamella+self.trench_offset)
+        width = 1e-06
+        pattern_left = microscope.patterning.create_rectangle(center_x=left_trench_x, center_y=lamella_center_y, depth=10e-06,
+                                                                width=width, height=height)
+        pattern_right = microscope.patterning.create_rectangle(center_x=right_trench_x, center_y=lamella_center_y,
+                                                              depth=10e-06,
+                                                              width=width, height=height)
+
+
+
+        return (pattern_left, pattern_right)
+
+
+
+
+    def run_trench_milling(self,lamella_name,alignment_image,stagepos,pattern_ref_directory):
+        '''
+        Input: Lamella Name from positions list, Alignment image as Numpy array,
+                stageposition as dictionary, Directory of the patterns defined through the SerialFIB GUI
+        Output: log for printing
+        Action: Runs the trench milling for the provided position
+        '''
+
+        patterns_reference_directory = pattern_ref_directory
+        patterns_output_directory = pattern_ref_directory[:-1] + '_out/'
+        try:
+            os.mkdir(patterns_output_directory)
+        except:
+            self.log_output = self.log_output + "Pattern Directory already existed!!!" + '\n'
+        self.lamella_name = lamella_name
+        pattern_left,pattern_right=self.create_trench_patterns(patterns_reference_directory,str(lamella_name)+'_lamella.ptf',str(lamella_name)+'_tp.ptf',str(lamella_name)+'_bp.ptf')
+
+        pattern_left_name = lamella_name + str('_trench_left.ptf')
+        pattern_right_name = lamella_name + str('_trench_right.ptf')
+        self.save_pattern(patterns_output_directory, pattern_left_name, pattern_left)
+        self.save_pattern(patterns_output_directory, pattern_right_name, pattern_right)
+
+        self.moveStageAbsolute(stagepos)
+
+        ref_img = alignment_image
+        ref_img.save(patterns_output_directory[:-1] + '/before_trenches.tif')
+        self.align(ref_img, 'ION')
+
+        self.align_current(new_current=5e-10, beam='ION')
+
+
+        self.run_milling(patterns_output_directory, pattern_left_name, pattern_right_name,milling_time=60)
+
+        current_img=scope.take_image_IB()
+        current_img.save(patterns_output_directory[:-1] + '/after_trenches.tif')
+        return(self.log_output)
 
     def run_milling(self,pattern_dir,tp_filename,bp_filename,milling_time):
         print("Clearing all patterns in the active view...")
-        #microscope.patterning.clear_patterns()
+        microscope.patterning.clear_patterns()
         print("Creating new rectangle pattern on top...")
-        #microscope.patterning.set_default_beam_type(BeamType.ION)
+        microscope.patterning.set_default_beam_type(BeamType.ION)
+        #microscope.patterning.set_default_application_file("Si")
         tp = self.pattern_parser(pattern_dir,tp_filename)
         bp = self.pattern_parser(pattern_dir,bp_filename)
         print("Patterns have been parsed")
@@ -1186,77 +1234,6 @@ class fibsem:
         print("Done")
         return()
 
-
-    def create_trench_patterns(self,directory,pattern_lamella,pattern_above,pattern_below):
-        '''
-        Input: Directory containing the user input from the SerialFIB GUI as xT patterns
-        Output: AutoScript4 "pattern" objects for trench milling
-        Action: None
-        '''
-        pattern_above = self.pattern_parser(directory, pattern_above)
-        start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
-        pattern_below = self.pattern_parser(directory, pattern_below)
-        start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
-        pattern_lamella = self.pattern_parser(directory, pattern_lamella)
-        lamella_center_x = pattern_lamella.center_x
-        lamella_center_y = pattern_lamella.center_y
-        width_lamella = pattern_lamella.width
-        top_center_y=pattern_above.center_y
-        bottom_center_y=pattern_below.center_y
-        height=abs(top_center_y-bottom_center_y)
-
-        width = 0.5e-06
-
-        #left_trench_x=(lamella_center_x)#-0.5*width_lamella-self.trench_offset
-        left_trench_x=(lamella_center_x)-self.trench_offset-width
-        right_trench_x=(lamella_center_x)+1*width_lamella+self.trench_offset 
-
-        pattern_left = self.create_pattern(left_trench_x, lamella_center_y - height/2, height, width)
-        pattern_right = self.create_pattern(right_trench_x, lamella_center_y - height/2, height, width)
-
-        return (pattern_left, pattern_right)
-
-    def run_trench_milling(self,lamella_name,alignment_image,stagepos,pattern_ref_directory):
-        '''
-        Input: Lamella Name from positions list, Alignment image as Numpy array,
-                stageposition as dictionary, Directory of the patterns defined through the SerialFIB GUI
-        Output: log for printing
-        Action: Runs the trench milling for the provided position
-        '''
-
-        patterns_reference_directory = pattern_ref_directory
-        patterns_output_directory = pattern_ref_directory[:-1] + '_out/'
-        try:
-            os.mkdir(patterns_output_directory)
-        except:
-            self.log_output = self.log_output + "Pattern Directory already existed!!!" + '\n'
-        self.lamella_name = lamella_name
-
-        pattern_left,pattern_right=self.create_trench_patterns(patterns_reference_directory,str(lamella_name)+'_lamella.ptf',str(lamella_name)+'_tp.ptf',str(lamella_name)+'_bp.ptf')
-
-        pattern_left_name = lamella_name + str('_trench_left.ptf')
-        pattern_right_name = lamella_name + str('_trench_right.ptf')
-        self.save_pattern(patterns_output_directory, pattern_left_name, pattern_left, current=7e-10, time=60)
-        self.save_pattern(patterns_output_directory, pattern_right_name, pattern_right, current=7e-10, time=60)
-
-        self.moveStageAbsolute(stagepos)
-
-        ref_img = alignment_image
-        ref_img.save(patterns_output_directory[:-1] + '/before_trenches.tif')
-        self.align(ref_img, 'ION')
-
-        self.align_current(new_current=7e-10, beam='ION')
-        #print(patterns_output_directory,pattern_left_name)
-        #self.run_custom_milling(patterns_output_directory,pattern_left_name,milling_time=60)
-        #self.run_custom_milling(patterns_output_directory,pattern_right_name,milling_time=60)
-        self.test_pattern(patterns_output_directory+'/'+pattern_left_name)
-        self.test_pattern(patterns_output_directory+'/'+pattern_right_name)
-
-        #current_img = self.take_image_IB()
-        #current_img.save(patterns_output_directory[:-1] + '/after_trenches.tif')
-        return(self.log_output)
-
-
     def create_custom_protocol(self, directory, pattern_lamella, pattern_above, pattern_below, protocol_filename,mode='fine'):
         '''
         Input: Directory path as string, filename of lamella pattern, and extreme point patterns as string
@@ -1267,24 +1244,19 @@ class fibsem:
         Action: None
         '''
         pattern_above = self.pattern_parser(directory, pattern_above)
-        #start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
-        start_position_above = pattern_above.center_y + pattern_above.height
+        start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
         pattern_below = self.pattern_parser(directory, pattern_below)
-        #start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
-        start_position_below = pattern_below.center_y
+        start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
         pattern_lamella = self.pattern_parser(directory, pattern_lamella)
         lamella_center_x = pattern_lamella.center_x
-
-        # CODE CHANGES FOR TFS TO ZEISS CONVENTION
-        lamella_center_y = pattern_lamella.center_y + 0.5 * pattern_lamella.height
+        lamella_center_y = pattern_lamella.center_y
         width_lamella = pattern_lamella.width
 
-        ### DOESNT EXIST FOR ZEISS ###
-        #microscope.patterning.clear_patterns()
+        microscope.patterning.clear_patterns()
 
-        from src.Zeiss.makePatterns_LamellaDesigner import make_protocol
-        from src.Zeiss.makePatterns_LamellaDesigner import read_protocolfile
-        from src.Zeiss.makePatterns_LamellaDesigner import write_protocolfile
+        from src.makePatterns_LamellaDesigner import make_protocol
+        from src.makePatterns_LamellaDesigner import read_protocolfile
+        from src.makePatterns_LamellaDesigner import write_protocolfile
         protocolfile_lists=read_protocolfile(protocol_filename)
         for i in protocolfile_lists:
             i.update({'width':width_lamella})
@@ -1312,8 +1284,7 @@ class fibsem:
                     if IB_Current == 0:
                         IB_Current = 1e-11
                 except:
-                    ### COMMENTED OUT TO ADJUST TO ZEISS CONVENTION
-                    center_y = lamella_center_y - float(j['Offset_y']) #+ pattern_lamella.height
+                    center_y = lamella_center_y - float(j['Offset_y'])
                     center_x = lamella_center_x + float(j['Offset_x'])
                     height = float(j['Height_y'])
                     if j['Width_x'] == "'Lamella'":
@@ -1324,15 +1295,10 @@ class fibsem:
                     try:
                         pattern_type = j['PatternType']
                         if pattern_type == "Cross-Section":
-                            #pattern = microscope.patterning.create_regular_cross_section(center_x=center_x,
-                            #                                                             center_y=center_y,
-                            #                                                             depth=10e-06, width=width,
-                            #                                                             height=height)
-                            pattern = self.create_pattern(center_x,
-                                                                center_y,
-                                                                height,
-                                                                width,
-                                                                10e-06)
+                            pattern = microscope.patterning.create_regular_cross_section(center_x=center_x,
+                                                                                         center_y=center_y,
+                                                                                         depth=10e-06, width=width,
+                                                                                         height=height)
                         elif pattern_type == "Cleaning Cross-Section":
                             pattern = microscope.patterning.create_regular_cross_section(center_x=center_x,
                                                                                          center_y=center_y,
@@ -1344,13 +1310,9 @@ class fibsem:
                                                                              height=height)
                     except:
                         print("No Pattern Type defined")
-                        #pattern = microscope.patterning.create_rectangle(center_x=center_x, center_y=center_y,
-                        #                                                 depth=10e-06, width=width, height=height)
-                        pattern = self.create_pattern(center_x,
-                                                            center_y,
-                                                            height,
-                                                            width,
-                                                            10e-06)
+                        pattern = microscope.patterning.create_rectangle(center_x=center_x, center_y=center_y,
+                                                                         depth=10e-06, width=width, height=height)
+
                     try:
                         if j['ScanDirection'] == "TopToBottom":
                             pattern.scan_direction = PatternScanDirection.TOP_TO_BOTTOM
@@ -1473,7 +1435,6 @@ class fibsem:
             except:
                 print("Directory " + label + " already exists")
 
-            #pixel_size = alignment_image.metadata.binary_result.pixel_size[0]
             pixel_size = alignment_image.metadata.binary_result.pixel_size.x
             image_shape = np.shape(alignment_image.data)
 
@@ -1496,22 +1457,17 @@ class fibsem:
 
                         w=i[2]
                         h=i[3]
-
-                        #x = (px - image_shape[1] / 2) + h / 2
-                        #y = -w / 2 - (py - image_shape[0] / 2)
-                        x = (px - image_shape[1] / 2)
-                        y = - (py - image_shape[0] / 2)
+                        x = (px - image_shape[1] / 2) + h / 2
+                        y = -w / 2 - (py - image_shape[0] / 2)
 
                         try:
-                            pattern = self.create_pattern(x * pixel_size, y * pixel_size, w * pixel_size,
+                            pattern = scope.create_pattern(x * pixel_size, y * pixel_size, w * pixel_size,
                                                            h * pixel_size)
-                            self.save_pattern(lamella_dir, pattern_filename, pattern)
+                            scope.save_pattern(lamella_dir, pattern_filename, pattern)
                         except:
+                            pattern = Pattern(0, 0, 0, 0, 0, 'UP')
+                            scope.save_pattern(lamella_dir, pattern_filename, pattern)
                             print("Error in Pattern Writing: No Microscope connected?")
-                            #pattern = Pattern(0, 0, 0, 0, 0, 'UP')
-                            pattern=DummyPattern()
-                            self.save_pattern(lamella_dir, pattern_filename, pattern)
-                           
                 except KeyError:
                     print('No Patterns were found')
 
@@ -1592,9 +1548,7 @@ class fibsem:
             for pattern in step:
 
                 pattern_name = lamella_name + str('_step_') + str(step_num)+str('_pattern_')+str(pattern_num)+str('.ptf')
-                ### TEST
-                self.save_pattern(patterns_output_directory,pattern_name,pattern,current=steps_current[step_num],time=steps_time[step_num])
-                ###
+                self.save_pattern(patterns_output_directory,pattern_name,pattern)
                 pattern_names.append(pattern_name)
                 pattern_num=pattern_num+1
             step_pattern_names.append(pattern_names)
@@ -1604,7 +1558,7 @@ class fibsem:
 
         self.moveStageAbsolute(stagepos)
         ref_img.save(patterns_output_directory[:-1] + '/initial_fine_alignment_img.tif')
-        #self.align(ref_img,'ION')
+        self.align(ref_img,'ION')
 
         for i in range(0,step_num):
             if self.continuerun:
@@ -1914,10 +1868,7 @@ class fibsem:
                 pattern_name = lamella_name + str('_step_') + str(step_num) + str('_pattern_') + str(
                     pattern_num) + str(
                     '.ptf')
-                #current needs to go here
-                current=steps_current[step_num]
-                time=float(steps_time[step_num])
-                self.save_pattern(patterns_output_directory, pattern_name, pattern,current,time)
+                self.save_pattern(patterns_output_directory, pattern_name, pattern)
                 pattern_names.append(pattern_name)
                 pattern_num = pattern_num + 1
 
@@ -1927,39 +1878,20 @@ class fibsem:
 
         self.moveStageAbsolute(stagepos)
         ref_img.save(patterns_output_directory[:-1] + '/initial_fine_alignment_img.tif')
-        
-
-        ### COMMENT OUT FOR TEST
-        #self.align_test(ref_img, 'ION')
-        self.align(ref_img,'ION')
+        self.align(ref_img, 'ION')
 
 
-        # for i in range(0, step_num):
-        #     if self.continuerun:
-        #         if float(steps_current[i]) == 0:
-        #             self.align_current(new_current=1e-11, beam='ION')
-        #         else:
-        
-        #             self.align_current(new_current=float(steps_current[i]), beam='ION')
-        #         self.run_custom_milling(patterns_output_directory, step_pattern_names[i], int(steps_time[i]))
-        print(pattern_names)
-        for j in range(0,len(step_pattern_names)):
-            #if self.continuerun:
-            if float(steps_current[j]) == 0:
+        for i in range(0, step_num):
+            if self.continuerun:
+                if float(steps_current[i]) == 0:
                     self.align_current(new_current=1e-11, beam='ION')
-            else:
-                new_current=float(steps_current[j])
-                self.align_current(new_current)
-            pattern_names=step_pattern_names[j]
-            for i in range(0,len(pattern_names)):
-                if self.continuerun:
-                    print(pattern_names[i])
-                    self.test_pattern(patterns_output_directory+'/'+pattern_names[i])
-                    #time.sleep(15)
+                else:
 
+                    self.align_current(new_current=float(steps_current[i]), beam='ION')
+
+                self.run_custom_milling(patterns_output_directory, step_pattern_names[i], int(steps_time[i]))
 
         return (self.log_output)
-
 
 
 
@@ -1971,4 +1903,3 @@ class fibsem:
 #scope=fibsem()
 
 
-#scope.test_pattern()
