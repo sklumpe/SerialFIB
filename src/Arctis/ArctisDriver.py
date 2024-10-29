@@ -40,6 +40,7 @@ try:
     from autoscript_toolkit.template_matchers import * 
     import autoscript_toolkit.vision as vision_toolkit
     from src.custom_matchers_v3 import *
+    from src.Arctis.read_trench_mill_params import *
 except:
     print("No Autoscript installed")
 
@@ -84,6 +85,7 @@ class fibsem:
         # Default alignment current
         self.alignment_current = float(1e-11)
         self.trench_offset = 4e-06
+        self.trench_params = './src/Arctis/relief_cut_params.txt'
         # Variable for stopping operation
         self.continuerun = True
         
@@ -970,37 +972,90 @@ class fibsem:
         return()
 
 
-    def create_trench_patterns(self,directory,pattern_lamella,pattern_above,pattern_below):
+    # def create_trench_patterns(self,directory,pattern_lamella,pattern_above,pattern_below):
+    #     '''
+    #     Input: Directory containing the user input from the SerialFIB GUI as xT patterns
+    #     Output: AutoScript4 "pattern" objects for trench milling
+    #     Action: None
+    #     '''
+    #     pattern_above = self.pattern_parser(directory, pattern_above)
+    #     start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+    #     pattern_below = self.pattern_parser(directory, pattern_below)
+    #     start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+    #     pattern_lamella = self.pattern_parser(directory, pattern_lamella)
+    #     lamella_center_x = pattern_lamella.center_x
+    #     lamella_center_y = pattern_lamella.center_y
+    #     width_lamella = pattern_lamella.width
+    #     top_center_y=pattern_above.center_y
+    #     bottom_center_y=pattern_below.center_y
+    #     height=abs(top_center_y-bottom_center_y)
+
+    #     left_trench_x=lamella_center_x+0.5*width_lamella+self.trench_offset
+    #     right_trench_x=lamella_center_x-(0.5*width_lamella+self.trench_offset)
+    #     width = 1e-06
+    #     pattern_left = microscope.patterning.create_rectangle(center_x=left_trench_x, center_y=lamella_center_y, depth=10e-06,
+    #                                                             width=width, height=height)
+    #     pattern_right = microscope.patterning.create_rectangle(center_x=right_trench_x, center_y=lamella_center_y,
+    #                                                           depth=10e-06,
+    #                                                           width=width, height=height)
+
+
+
+    #     return (pattern_left, pattern_right)
+    def create_trench_patterns(self,directory,pattern_lamella,pattern_above,pattern_below, file=None):
         '''
         Input: Directory containing the user input from the SerialFIB GUI as xT patterns
         Output: AutoScript4 "pattern" objects for trench milling
         Action: None
         '''
-        pattern_above = self.pattern_parser(directory, pattern_above)
-        start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
-        pattern_below = self.pattern_parser(directory, pattern_below)
-        start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
-        pattern_lamella = self.pattern_parser(directory, pattern_lamella)
-        lamella_center_x = pattern_lamella.center_x
-        lamella_center_y = pattern_lamella.center_y
-        width_lamella = pattern_lamella.width
-        top_center_y=pattern_above.center_y
-        bottom_center_y=pattern_below.center_y
-        height=abs(top_center_y-bottom_center_y)
+        if file == None:
+            pattern_above = self.pattern_parser(directory, pattern_above)
+            start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+            pattern_below = self.pattern_parser(directory, pattern_below)
+            start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+            pattern_lamella = self.pattern_parser(directory, pattern_lamella)
+            lamella_center_x = pattern_lamella.center_x
+            lamella_center_y = pattern_lamella.center_y
+            width_lamella = pattern_lamella.width
+            top_center_y=pattern_above.center_y
+            bottom_center_y=pattern_below.center_y
+            height=abs(top_center_y-bottom_center_y)
 
-        left_trench_x=lamella_center_x+0.5*width_lamella+self.trench_offset
-        right_trench_x=lamella_center_x-(0.5*width_lamella+self.trench_offset)
-        width = 1e-06
-        pattern_left = microscope.patterning.create_rectangle(center_x=left_trench_x, center_y=lamella_center_y, depth=10e-06,
+            left_trench_x=lamella_center_x+0.5*width_lamella+self.trench_offset
+            right_trench_x=lamella_center_x-(0.5*width_lamella+self.trench_offset)
+            width = 1e-06
+            pattern_left = microscope.patterning.create_rectangle(center_x=left_trench_x, center_y=lamella_center_y, depth=10e-06,
+                                                                    width=width, height=height)
+            pattern_right = microscope.patterning.create_rectangle(center_x=right_trench_x, center_y=lamella_center_y,
+                                                                depth=10e-06,
                                                                 width=width, height=height)
-        pattern_right = microscope.patterning.create_rectangle(center_x=right_trench_x, center_y=lamella_center_y,
-                                                              depth=10e-06,
-                                                              width=width, height=height)
+        else:
+            params_reliefcut=read_trench_mill_params(file)
+            #{'relief_cut_distance': 1e-06, 'relief_cut_width': 1e-06}
+            relief_cut_distance=params_reliefcut['relief_cut_distance']
+            relief_cut_width=params_reliefcut['relief_cut_width']
+            pattern_above = self.pattern_parser(directory, pattern_above)
+            start_position_above = pattern_above.center_y + 0.5 * pattern_above.height
+            pattern_below = self.pattern_parser(directory, pattern_below)
+            start_position_below = pattern_below.center_y - 0.5 * pattern_below.height
+            pattern_lamella = self.pattern_parser(directory, pattern_lamella)
+            lamella_center_x = pattern_lamella.center_x
+            lamella_center_y = pattern_lamella.center_y
+            width_lamella = pattern_lamella.width
+            top_center_y=pattern_above.center_y
+            bottom_center_y=pattern_below.center_y
+            height=abs(top_center_y-bottom_center_y)
 
-
+            left_trench_x=lamella_center_x+0.5*width_lamella+relief_cut_distance
+            right_trench_x=lamella_center_x-(0.5*width_lamella+relief_cut_distance)
+            width = relief_cut_width
+            pattern_left = microscope.patterning.create_rectangle(center_x=left_trench_x, center_y=lamella_center_y, depth=10e-06,
+                                                                    width=width, height=height)
+            pattern_right = microscope.patterning.create_rectangle(center_x=right_trench_x, center_y=lamella_center_y,
+                                                                depth=10e-06,
+                                                                width=width, height=height)
 
         return (pattern_left, pattern_right)
-
 
 
 
@@ -1019,8 +1074,10 @@ class fibsem:
         except:
             self.log_output = self.log_output + "Pattern Directory already existed!!!" + '\n'
         self.lamella_name = lamella_name
-        pattern_left,pattern_right=self.create_trench_patterns(patterns_reference_directory,str(lamella_name)+'_lamella.ptf',str(lamella_name)+'_tp.ptf',str(lamella_name)+'_bp.ptf')
-
+        if self.trench_params==None:
+            pattern_left,pattern_right=self.create_trench_patterns(patterns_reference_directory,str(lamella_name)+'_lamella.ptf',str(lamella_name)+'_tp.ptf',str(lamella_name)+'_bp.ptf')
+        else:
+            pattern_left,pattern_right=self.create_trench_patterns(patterns_reference_directory,str(lamella_name)+'_lamella.ptf',str(lamella_name)+'_tp.ptf',str(lamella_name)+'_bp.ptf',file=self.trench_params)
         pattern_left_name = lamella_name + str('_trench_left.ptf')
         pattern_right_name = lamella_name + str('_trench_right.ptf')
         self.save_pattern(patterns_output_directory, pattern_left_name, pattern_left)
