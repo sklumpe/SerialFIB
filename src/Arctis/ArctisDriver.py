@@ -922,16 +922,16 @@ class fibsem:
         scan_type=Pattern.__class__.__name__
         if scan_type=="CleaningCrossSectionPattern":
             name_tag='Pattern'+scan_type[:-7]
-            #dummy_pattern=r"./TemplatePatterns/PFIB/clean_cross.ptf"
-            dummy_pattern=r"D:/Users/sklumpe/GitHub/SerialFIB/TemplatePatterns/PFIB/clean_cross.ptf"
+            dummy_pattern=r"D:/SharedData/SerialFIB/TemplatePatterns/PFIB/clean_cross.ptf"
+            #dummy_pattern=r"D:/Users/sklumpe/GitHub/SerialFIB/TemplatePatterns/PFIB/clean_cross.ptf"
         elif scan_type=="RegularCrossSectionPattern":
             name_tag='Pattern'+scan_type[:-7]
-            #dummy_pattern=r"./TemplatePatterns/PFIB/cross.ptf"
-            dummy_pattern=r"D:/Users/sklumpe/GitHub/SerialFIB/TemplatePatterns/PFIB/cross.ptf"
+            dummy_pattern=r"D:/SharedData/SerialFIB/TemplatePatterns/PFIB/cross.ptf"
+            #dummy_pattern=r"D:/Users/sklumpe/GitHub/SerialFIB/TemplatePatterns/PFIB/cross.ptf"
         else:
             name_tag="PatternRectangle"
-            #dummy_pattern=r"./TemplatePatterns/PFIB/regular.ptf"
-            dummy_pattern=r"D:/Users/sklumpe/GitHub/SerialFIB/TemplatePatterns/PFIB/regular.ptf"
+            dummy_pattern=r"D:/SharedData/SerialFIB/TemplatePatterns/PFIB/regular.ptf"
+            #dummy_pattern=r"D:/Users/sklumpe/GitHub/SerialFIB/TemplatePatterns/PFIB/regular.ptf"
 
 
         tree = ET.parse(dummy_pattern)
@@ -1299,14 +1299,14 @@ class fibsem:
                         x = (px - image_shape[1] / 2) + h / 2
                         y = -w / 2 - (py - image_shape[0] / 2)
 
-                        try:
-                            pattern = self.create_pattern(x * pixel_size, y * pixel_size, w * pixel_size,
-                                                           h * pixel_size)
-                            self.save_pattern(lamella_dir, pattern_filename, pattern)
-                        except:
-                            pattern = Pattern(0, 0, 0, 0, 0, 'UP')
-                            self.save_pattern(lamella_dir, pattern_filename, pattern)
-                            print("Error in Pattern Writing: No Microscope connected?")
+                        #try:
+                        pattern = self.create_pattern(x * pixel_size, y * pixel_size, w * pixel_size,
+                                                       h * pixel_size)
+                        self.save_pattern(lamella_dir, pattern_filename, pattern)
+                        #except:
+                        #    pattern = Pattern(0, 0, 0, 0, 0, 'UP')
+                        #    self.save_pattern(lamella_dir, pattern_filename, pattern)
+                        #    print("Error in Pattern Writing: No Microscope connected?")
                 except KeyError:
                     print('No Patterns were found')
 

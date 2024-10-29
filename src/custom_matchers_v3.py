@@ -19,7 +19,10 @@ try:
     from skimage.feature import register_translation
 except ModuleNotFoundError:
     pass
-
+except ImportError:
+    pass
+except:
+    pass
 
 # Import statements necessary for class CustomCVMatcher
 # from custom_matchers import padded_cv_matchTemplate, padded_tiled_cv_matchTemplate

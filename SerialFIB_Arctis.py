@@ -10,7 +10,7 @@
 #                                                              #
 #             Max-Planck-Institute for Biochemistry            #
 #                    Martinsried, Germany                      #
-#                                                              #
+#                                                        e      #
 #             European Molecular Biology Laboratory            #
 #                    Heidelberg, Germany                       #
 #                                                              #
