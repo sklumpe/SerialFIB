@@ -398,7 +398,7 @@ class fibsem:
         Output: Image as numpy array
         Action: Take EB image with standard parameters
         '''
-        try:
+        # try:
             # Set view to electron beam
             # microscope.imaging.set_active_view(1)
 
@@ -416,13 +416,31 @@ class fibsem:
             # print("Acquiring EB snapshot")
             # img = microscope.imaging.grab_frame()
 
-            array = img.data
+            #array = img.data
 
 
-            return(img)
-        except:
-            print("ERROR: No Microscope connected")
-        return()
+            #return(img)
+        #except:
+            #print("ERROR: No Microscope connected")
+        #return()
+        imageWidth = 1024
+        imageHeight = 1024
+        # for simultaneous acquisition from multiple channels, we use this way of acquisition
+        channel=0
+        channel1=6
+        #channel2=
+        images = self.tescanScope.SEM.Scan.AcquireImagesFromChannels((channel,channel1), imageWidth, imageHeight, 320)
+        print(images[0])
+
+        image=np.array(images[1].Image)
+        img=DummyAdorned()
+        img.data=image
+        pixel_size=images[1].Header['MAIN']['PixelSizeX']
+        img.metadata.binary_result.pixel_size=Point(pixel_size,pixel_size)
+        print(images[1].Header.OPTCRE)
+        #microscope.beams.electron_beam.turn_off()
+        #print("Electron beam turned off")
+        return(img)
 
     def take_image_EB_SAV(self):
         '''
